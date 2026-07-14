@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<title>Pannello di Controllo Amministratore</title>
+	<link rel="stylesheet" type="text/css" media="all" href="./css/style.css" th:href="@{./css/style.css}" />
+</head>
+<body>
+	<!-- HEADER DI AMMINISTRAZIONE -->
+	<div class="admin-header">
+		<div class="welcome-section">
+			<img th:src="${user.profilePicturePath!=null?'./img/'+user.profilePicturePath:'./img/defaultProPic.png'}" 
+				 alt="Foto Profilo" 
+				 class="profile-pic" />
+			<p>Benvenuto, <span th:text="${user.nome+' '+user.cognome}">Admin Nome Cognome</span></p> 
+		</div>
+		<div class="action-section">
+			<a th:href="@{/VerifyProjects}" class="btn-action btn-action--warning">Visualizza e Verifica Progetti</a>
+			<a th:href="@{/Logout}" class="btn-logout">Logout</a> 
+		</div>
+	</div>
+
+	<div class="main-container">
+	 	<h3>Creazione nuovi progetti</h3>
+		<p class="page-subtitle">Compila i moduli sottostanti per inserire un nuovo progetto, definire i relativi WP o pianificare i task.</p>
+	
+		<div th:if="${errorMsg!=null and !#strings.isEmpty(errorMsg)}" class="error-banner" style="margin-bottom: 20px; background-color: #f8d7da; color: #721c24; padding: 12px; border-radius: 4px; border: 1px solid #f5c6cb;">
+			<p th:text="${errorMsg}">Si è verificato un errore.</p>
+		</div>
+
+		<div th:if="${msg!=null and !#strings.isEmpty(msg)}" class="success-banner-timeout">
+			<p th:text="${msg}">Operazione completata con successo!</p>
+		</div>
+
+		<div class="dashboard-forms-grid" style="display: flex; gap: 20px; flex-wrap: wrap; align-items: start;">
+			
+			<!-- FORM CREAZIONE PROGETTO -->
+			<div class="form-card-section" style="flex: 1; min-width: 300px; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+				<h3>Nuovo Progetto</h3>
+				<hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+				<form th:action="@{/DoCreateProject}" method="POST" class="form-vertical" autocomplete="off">
+					<div class="form-group">
+						<label for="nomeProgetto">Titolo Progetto:</label>
+						<input type="text" id="nomeProgetto" name="nomeProgetto" th:value="${submittedNome}" required class="form-input" />
+					</div>
+					<div class="form-group">
+						<label for="durata">Durata (in mesi):</label>
+						<input type="number" id="durata" name="durata" min="1" th:value="${submittedDurata}" required class="form-input" />
+					</div>
+					<div class="form-group">
+						<label for="idResponsabile">Tecnico Responsabile:</label>
+						<select id="idResponsabile" name="idResponsabile" required class="form-input">
+							<option value="" disabled th:selected="${submittedResponsabile==null}">-- Seleziona un Tecnico --</option>
+							<option th:each="t:${technicians}" th:value="${t.ID}" th:text="${t.nome+' '+t.cognome}" th:selected="${submittedResponsabile!=null and t.ID.toString()==submittedResponsabile.toString()}">
+								Nome Tecnico
+							</option>
+						</select>
+					</div>
+					<div class="form-actions" style="margin-top: 15px;">
+						<button type="submit" class="btn-submit" style="width: 100%;">SALVA PROGETTO</button>
+					</div>
+				</form>
+			</div>
+
+			<!-- FORM CREAZIONE WORK PACKAGE -->
+			<div class="form-card-section" style="flex: 1; min-width: 300px; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+				<h3>Nuovo Work Package</h3>
+				<hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+				<form th:action="@{/DoCreateWP}" method="POST" class="form-vertical" autocomplete="off">
+					<div class="form-group">
+						<label for="idProgettoWP">Progetto di Riferimento:</label>
+						<select id="idProgettoWP" name="idProgetto" required class="form-input">
+							<option value="" disabled th:selected="${submittedProgetto==null}">-- Seleziona un progetto attivo --</option>
+							<option th:each="p:${activeProjects}" th:value="${p.id}" th:text="${p.nomeProgetto+' (Durata: '+p.durata+' mesi)'}" th:selected="${submittedProgetto!=null and p.id.toString()==submittedProgetto.toString()}">
+								Nome Progetto
+							</option>
+						</select>
+					</div>
+					<div class="form-group">
+						<label for="nomeWP">Titolo del Work Package:</label>
+						<input type="text" id="nomeWP" name="nomeWP" th:value="${submittedNomeWP}" required class="form-input" />
+					</div>
+					<div class="form-group">
+						<label for="meseInizioWP">Mese Inizio:</label>
+						<input type="number" id="meseInizioWP" name="meseInizio" min="1" th:value="${submittedMeseInizioWP}" required class="form-input" />
+					</div>
+					<div class="form-group">
+						<label for="meseFineWP">Mese Fine:</label>
+						<input type="number" id="meseFineWP" name="meseFine" min="1" th:value="${submittedMeseFineWP}" required class="form-input" />
+					</div>
+					<div class="form-actions" style="margin-top: 15px;">
+						<button type="submit" class="btn-submit" style="width: 100%;">SALVA WORK PACKAGE</button>
+					</div>
+				</form>
+			</div>
+
+			<!-- FORM CREAZIONE TASK -->
+			<div class="form-card-section" style="flex: 1; min-width: 300px; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+				<h3>Nuovo Task</h3>
+				<hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+				
+				<form th:action="@{/Admin}" method="GET" class="form-vertical form-spacer">
+					<div class="form-group">
+						<label for="idProgettoTask">1. Scegli il Progetto:</label>
+						<div class="form-row" style="display: flex; gap: 5px;">
+							<select id="idProgettoTask" name="idProgetto" required class="form-input" style="flex-grow: 1;">
+								<option value="" disabled th:selected="${selectedProgettoId==null}">-- Seleziona Progetto --</option>
+								<option th:each="p:${activeProjects}" th:value="${p.id}" th:text="${p.nomeProgetto}" th:selected="${selectedProgettoId!=null and p.id.toString()==selectedProgettoId}">
+								</option>
+							</select>
+							<button type="submit" class="btn-load">Carica</button>
+						</div>
+					</div>
+				</form>
+
+				<form th:if="${selectedProgettoId!=null}" th:action="@{/DoCreateTask}" method="POST" class="form-vertical" autocomplete="off" style="margin-top: 15px;">
+					<input type="hidden" name="idProgetto" th:value="${selectedProgettoId}" />
+
+					<div th:if="${availableWPs==null or availableWPs.isEmpty()}" class="error-banner" style="padding: 8px; font-size: 0.9em; background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba;">
+						Nessun WP disponibile per questo progetto.
+					</div>
+
+					<div th:if="${availableWPs!=null and !availableWPs.isEmpty()}" class="form-vertical">
+						<div class="form-group">
+							<label for="idWP">2. Seleziona Work Package:</label>
+							<select id="idWP" name="idWP" required class="form-input">
+								<option value="" disabled th:selected="${submittedWP==null}">-- Seleziona un WP --</option>
+								<option th:each="w, wNum:${availableWPs}" th:value="${w.codiceWP}" th:text="${'WP'+wNum.count+' - '+w.titolo+' ('+w.meseInizio+' - '+w.meseFine+')'}" th:selected="${submittedWP!=null and w.codiceWP.toString()==submittedWP}">
+								</option>
+							</select>
+						</div>
+						<div class="form-group">
+							<label for="nomeTask">Titolo Task:</label>
+							<input type="text" id="nomeTask" name="nomeTask" th:value="${submittedNomeTask}" required class="form-input" />
+						</div>
+						<div class="form-group">
+							<label for="descrizione">Descrizione:</label>
+							<textarea rows="2" id="descrizione" name="descrizione" th:text="${submittedDescrizione}" required class="form-input"></textarea>
+						</div>
+						<div class="form-group">
+							<label for="meseInizioTask">Mese Inizio:</label>
+							<input type="number" id="meseInizioTask" name="meseInizio" min="1" th:value="${submittedMeseInizioTask}" required class="form-input" />
+						</div>
+						<div class="form-group">
+							<label for="meseFineTask">Mese Fine:</label>
+							<input type="number" id="meseFineTask" name="meseFine" min="1" th:value="${submittedMeseFineTask}" required class="form-input" />
+						</div>
+						<div class="form-actions" style="margin-top: 15px;">
+							<button type="submit" class="btn-submit" style="width: 100%;">SALVA TASK</button>
+						</div>
+					</div>
+				</form>
+			</div>
+
+		</div>
+	</div>
+</body>
+</html>

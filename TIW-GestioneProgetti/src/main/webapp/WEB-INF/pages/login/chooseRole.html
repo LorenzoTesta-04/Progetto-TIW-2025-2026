@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<title>Scegli Ruolo</title>
+	<link rel="stylesheet" type="text/css" media="all" href="./css/style.css" th:href="@{./css/style.css}" />
+</head>
+<body class="login-page">
+	<div class="login-box">
+		<h2>Benevenuto, <span th:text="${session.user.nome+' '+session.user.cognome}">User</span></h2>
+		<h4>Seleziona il ruolo con cui accedere</h4>
+		
+		<div class="roles-selection">
+			<form th:if="${session.user.manager}" th:action="@{/DoChooseRole}" method="post" style="margin-bottom: 10px;">
+				<input type="hidden" name="chosenRole" value="MANAGER">
+				<input type="submit" value="Manager">
+			</form>
+			<form th:if="${session.user.collaborator}" th:action="@{/DoChooseRole}" method="post">
+				<input type="hidden" name="chosenRole" value="COLLABORATORE">
+				<input type="submit" value="Collaboratore">
+			</form>
+		</div>
+		
+		<div class="logout-section">
+			<a th:href="@{/Logout}" class="logout-link">Logout</a>
+		</div>
+	</div>
+</body>
+</html>

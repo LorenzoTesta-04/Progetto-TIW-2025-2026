@@ -1,0 +1,275 @@
+/* ==========================================================================
+   Gestione Allocazioni - Stili per il Contenitore Principale e Scroll
+   ========================================================================== */
+
+/* Contenitore principale dei task (Scrollable senza barra visibile) */
+.tasks-scroll-container {
+    margin-top: 20px;
+    background: #fff;
+    border: 1px solid #2980b9;
+    border-radius: 6px;
+    padding: 20px;
+    overflow-y: auto;
+    
+    /* Nasconde la barra di scorrimento su Firefox */
+    scrollbar-width: none;
+    /* Nasconde la barra di scorrimento su IE ed Edge legacy */
+    -ms-overflow-style: none;  
+}
+
+/* Nasconde la barra di scorrimento su Chrome, Safari ed Edge moderno */
+.tasks-scroll-container::-webkit-scrollbar {
+    display: none;
+}
+
+/* Intestazione fissa (Sticky) che copre i task durante lo scorrimento */
+.sticky-wp-header {
+    position: sticky;
+    top: -20px;
+    background: #fff;
+    margin: -20px -20px 20px -20px;
+    padding: 20px 20px 15px 20px;
+    border-bottom: 2px solid #2980b9;
+    z-index: 10;
+}
+
+.sticky-wp-header h4 {
+    color: #2980b9;
+    margin: 0 0 5px 0;
+    font-size: 1.2rem;
+}
+
+.wp-validity-info {
+    font-size: 0.85rem;
+    color: #7f8c8d;
+    font-weight: bold;
+}
+
+.wp-validity-info span {
+    color: #2c3e50;
+}
+
+
+/* ==========================================================================
+   Scheda del Singolo Task (Card)
+   ========================================================================== */
+
+.task-card {
+    background: #f8f9fa;
+    border: 1px solid #dcdde1;
+    padding: 20px;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.task-card-header {
+    border-bottom: 1px dashed #ccc;
+    padding-bottom: 12px;
+}
+
+.task-label {
+    font-size: 0.9rem;
+    color: #7f8c8d;
+    font-weight: bold;
+    margin-bottom: 2px;
+}
+
+.task-title {
+    color: #2980b9;
+    font-size: 1.1rem;
+}
+
+.task-description {
+    margin: 6px 0 0 0;
+    font-size: 0.88rem;
+    color: #555;
+    line-height: 1.4;
+}
+
+
+/* ==========================================================================
+   Form di Allocazione e Sezioni Affiancate
+   ========================================================================== */
+
+.allocation-form-wrapper {
+    background: #fff;
+    padding: 15px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+}
+
+.allocation-form {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: 20px;
+}
+
+/* Sotto-sezioni comuni */
+.form-section-label {
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: #2c3e50;
+    display: block;
+    padding-bottom: 4px;
+}
+
+.form-section-desc {
+    font-size: 0.75rem;
+    color: #7f8c8d;
+    margin: 0 0 6px 0;
+}
+
+/* SEZIONE 1: Collaboratori */
+.collaborators-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.collaborators-section .form-section-label {
+    border-bottom: 2px solid #3498db;
+    margin-bottom: 4px;
+}
+
+.collaborators-select {
+    padding: 8px;
+    font-size: 0.85rem;
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #fafafa;
+    flex-grow: 1;
+    min-height: 110px;
+}
+
+/* SEZIONE 2: Ore Mensili */
+.hours-section {
+    flex: 1.4;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border-left: 1px solid #e2e8f0;
+    padding-left: 20px;
+    gap: 10px;
+}
+
+.hours-section .form-section-label {
+    border-bottom: 2px solid #e67e22;
+    margin-bottom: 8px;
+}
+
+.hours-section .form-section-desc {
+    margin-bottom: 10px;
+}
+
+/* Griglia dei mesi */
+.months-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.month-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #f1f5f9;
+    padding: 6px;
+    border-radius: 4px;
+    min-width: 80px;
+    box-sizing: border-box;
+    border: 1px solid #e2e8f0;
+}
+
+.month-box .month-label {
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: #475569;
+    margin-bottom: 4px;
+}
+
+.month-input {
+    width: 65px;
+    padding: 5px;
+    font-size: 0.85rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 3px;
+    text-align: center;
+}
+
+/* Pulsante di salvataggio interno alla sezione */
+.btn-save-allocation {
+    background-color: #27ae60;
+    border: none;
+    padding: 10px 15px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    cursor: pointer;
+    width: 100%;
+    border-radius: 4px;
+    color: white;
+    margin-top: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.2s;
+}
+
+.btn-save-allocation:hover {
+    background-color: #219653;
+}
+
+/* Stato vuoto */
+.no-tasks-msg {
+    font-style: italic;
+    color: #7f8c8d;
+    padding: 10px 0;
+}
+
+.success-banner-timeout {
+	color: #155724; 
+    background-color: #d4edda; 
+    padding: 10px; 
+    border: 1px solid #c3e6cb; 
+    border-radius: 4px; 
+    margin-bottom: 20px;
+    animation: fadeOutAndHide 5s forwards;
+    overflow: hidden;
+}
+
+@keyframes fadeOutAndHide {
+    0% {
+        opacity: 1;
+        max-height: 100px;
+        padding: 10px;
+        margin-bottom: 20px;
+        border-width: 1px;
+    }
+    /* Resta visibile al 100% per l'80% del tempo (circa 4 secondi) */
+    80% {
+        opacity: 1;
+        max-height: 100px;
+        padding: 10px;
+        margin-bottom: 20px;
+        border-width: 1px;
+    }
+    /* Negli ultimi istanti sfuma l'opacità */
+    95% {
+        opacity: 0;
+        max-height: 100px;
+        padding: 10px;
+        margin-bottom: 20px;
+        border-width: 1px;
+    }
+    /* Al 100% azzera anche gli spazi per non lasciare un vuoto bianco nella pagina */
+    100% {
+        opacity: 0;
+        max-height: 0;
+        padding: 0;
+        margin-bottom: 0;
+        border-width: 0;
+    }
+}

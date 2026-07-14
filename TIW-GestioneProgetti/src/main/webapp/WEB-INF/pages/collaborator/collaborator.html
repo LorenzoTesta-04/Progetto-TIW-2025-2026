@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<title>Inserimento Ore di Lavoro</title>
+	<link rel="stylesheet" type="text/css" media="all" href="./css/style.css" th:href="@{./css/style.css}" />
+</head>
+<body>
+	<div class="admin-header">
+		<div class="welcome-section">
+			<img th:src="${user.profilePicturePath!=null?'./img/'+user.profilePicturePath:'./img/defaultProPic.png'}"
+				 alt="Foto Profilo" class="profile-pic" />
+			<p>Benvenuto, <span th:text="${user.nome+' '+user.cognome}">Nome Collaboratore</span></p>
+		</div>
+		<div class="action-section">
+			<a th:href="@{/Logout}" class="btn-logout">Logout</a>
+		</div>
+	</div>
+
+	<div class="main-container">
+		<h3>Rendicontazione Ore Lavorative</h3>
+		<p class="page-subtitle">Seleziona un progetto attivo e scegli un Task per visualizzarne i dettagli e registrare le ore.</p>
+		
+		<div th:if="${errorMsg!=null and !#strings.isEmpty(errorMsg)}" class="error-banner" style="margin-bottom: 20px; background-color: #f8d7da; color: #721c24; padding: 12px; border-radius: 4px; border: 1px solid #f5c6cb;">
+			<p th:text="${errorMsg}">Si è verificato un errore.</p>
+		</div>
+
+		<div th:if="${param.success!=null}" class="success-banner-timeout">
+			Ore di lavoro aggiornate e registrate con successo nel sistema!
+		</div>
+
+		<form th:action="@{/Collaborator}" method="GET" class="inline-form form-spacer">
+			<label for="idProgetto" class="form-section-label">Seleziona Progetto:</label>
+			<select name="idProgetto" id="idProgetto" required class="form-select">
+				<option value="" disabled th:selected="${selectedProject==null}">-- Scegli un Progetto --</option>
+				<option th:each="p:${availableProjects}"
+						th:value="${p.id}"
+						th:text="${p.nomeProgetto}"
+						th:selected="${selectedProject!=null && selectedProject.id==p.id}">
+				</option>
+			</select>
+			<button type="submit" class="btn-load">Seleziona</button>
+		</form>
+
+		<div th:if="${selectedProject!=null}">
+			<div class="details-box" style="margin-bottom: 25px;">
+				<h4 style="margin-bottom: 0">Work Packages e Task Assegnati</h4>
+				<p class="form-section-desc">Seleziona un Task per visualizzarne la descrizione e registrarne le ore lavorative.</p>
+				
+				<form th:action="@{/Collaborator}" method="GET" class="inline-form" style="margin-bottom: 0px">
+					<input type="hidden" name="idProgetto" th:value="${selectedProject.id}" />
+					
+					<label for="idTask" class="form-section-label">Scegli Task:</label>
+					<select name="idTask" id="idTask" required class="form-select">
+						<option value="" disabled th:selected="${selectedTask==null}">-- Seleziona un Task --</option>
+						<th:block th:each="wp:${selectedProject.wps}">
+							<optgroup th:label="${wp.titolo}">
+								<option th:each="task:${wp.tasks}"
+										th:value="${task.id}"
+										th:text="${task.nomeTask}"
+										th:selected="${selectedTask!=null && selectedTask.id==task.id}">
+								</option>
+							</optgroup>
+						</th:block>
+					</select>
+					<button type="submit" class="btn-load">Seleziona Task</button>
+				</form>
+			</div>
+
+			<div th:if="${selectedTask!=null}" class="details-box" style="border-left: 4px solid #0056b3; background-color: #fdfdfd; margin-bottom: 25px;">
+				<h4>Descrizione del Task</h4>
+				
+				<table style="width: 100%; margin-top: 10px; border-collapse: collapse; text-align: left; table-layout: fixed;">
+					<tr>
+						<th style="width: 250px; padding: 8px 5px; color: #555; font-weight: 600; vertical-align: top;">Titolo Task:</th>
+						<td style="padding: 8px 5px; font-weight: bold; vertical-align: top;" th:text="${selectedTask.nomeTask}">Nome</td>
+					</tr>
+					<tr>
+						<th style="width: 250px; padding: 8px 5px; color: #555; font-weight: 600; vertical-align: top;">Descrizone Task:</th>
+						<td style="padding: 8px 5px; vertical-align: top;" th:text="${selectedTask.descrizione}">Descrizione</td>
+					</tr>
+					<tr>
+						<th style="width: 250px; padding: 8px 5px; color: #555; font-weight: 600; vertical-align: top;">Rendicontazione Mensile:</th>
+						<td style="padding: 8px 5px;">
+							
+							<div class="matrix-table-wrapper" style="border: none; margin-bottom: 0; box-shadow: none; background: none">
+								<table border="1" style="border-collapse: collapse; width: 100%; text-align: center; font-size: 13px;">
+									<thead>
+										<tr>
+											<th colspan="2" th:each="m:${#numbers.sequence(selectedTask.meseInizio, selectedTask.meseFine)}"
+												th:text="${'M'+m}" class="td-durata" style="padding: 5px; font-weight: 600; background-color: #f1f1f1;">MX</th>
+										</tr>
+										<tr>
+											<th:block th:each="m:${#numbers.sequence(selectedTask.meseInizio, selectedTask.meseFine)}">
+												<th class="th-previste">P</th>
+												<th class="th-lavorate">L</th>
+											</th:block>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<!-- Celle dei dati affiancate mese per mese -->
+											<th:block th:each="m:${#numbers.sequence(selectedTask.meseInizio, selectedTask.meseFine)}">
+												<td class="task-time-previste" th:text="${selectedTask.orePreviste.containsKey(m)}?${selectedTask.orePreviste.get(m)}:'-'">-</td>
+												<td class="task-time-lavorate" th:text="${selectedTask.oreLavorate.containsKey(m)}?${selectedTask.oreLavorate.get(m)}:'-'">-</td>
+											</th:block>
+										</tr>
+									</tbody>
+								</table>
+							</div> 
+						</td>
+					</tr>
+				</table>
+			</div>
+
+			<div th:if="${selectedTask!=null}" class="details-box">
+				<h4>Registrazione Ore Lavorative</h4>
+				
+				<form th:action="@{/Collaborator}" method="GET" class="inline-form" >
+					<input type="hidden" name="idProgetto" th:value="${selectedProject.id}" />
+					<input type="hidden" name="idTask" th:value="${selectedTask.id}" />
+					
+					<label for="mese" class="form-section-label">Seleziona Mese di Riferimento:</label>
+					<select name="mese" id="mese" class="form-select" required>
+						<option value="" disabled th:selected="${selectedMese==null}">-- Scegli un Mese --</option>
+						<option th:each="m:${#numbers.sequence(selectedTask.meseInizio, selectedTask.meseFine)}"
+								th:value="${m}"
+								th:text="'Mese '+${m}"
+								th:selected="${selectedMese!=null && selectedMese==m}">
+						</option>
+					</select>
+					<div>
+						<button type="submit" class="btn-load">Seleziona Mese</button>
+					</div>
+				</form>
+			
+				<form th:action="@{/DoSaveHours}" method="POST" autocomplete="off" th:if="${selectedMese!=null}" class="inline-form" style="margin-bottom: 0px">
+					<input type="hidden" name="idProgetto" th:value="${selectedProject.id}" />
+					<input type="hidden" name="idTask" th:value="${selectedTask.id}" />
+					<input type="hidden" name="mese" th:value="${selectedMese}" />
+			
+					<label for="oreLavorate" class="form-section-label">
+						Inserisci Ore per <span th:text="'Mese '+${selectedMese}"></span>:
+					</label>
+					<input type="number" name="oreLavorate" id="oreLavorate"
+						   class="input-ore" min="0" required 
+						   th:value="${oreLavorateNelMese}"/>
+					<div>
+						<button type="submit" class="btn-save" style="height: 40px; padding: 0 25px;">SALVA ORE</button>
+					</div>
+				</form>
+			</div>
+
+		</div>
+
+	</div>
+</body>
+</html>

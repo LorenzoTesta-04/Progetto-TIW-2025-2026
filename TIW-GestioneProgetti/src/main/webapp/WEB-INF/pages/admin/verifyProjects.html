@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<title>Monitoraggio Stato Progetti</title>
+	<link rel="stylesheet" type="text/css" media="all" href="./css/style.css" th:href="@{./css/style.css}" />
+</head>
+<body>
+	<div class="admin-header">
+		<div class="welcome-section">
+			<img th:src="${user.profilePicturePath!=null?'./img/'+user.profilePicturePath:'./img/defaultProPic.png'}" alt="Foto Profilo" class="profile-pic" />
+			<p>Benvenuto, <span th:text="${user.nome+' '+user.cognome}">Admin</span></p>
+		</div>
+		<div class="action-section">
+			<a th:href="@{/Admin}" class="btn-home">Indietro</a>
+			<a th:href="@{/Logout}" class="btn-logout">Logout</a>
+		</div>
+	</div>
+
+	<div class="main-container">
+		<h3>Monitoraggio Stato Progetti</h3>
+		<p class="page-subtitle">Seleziona un progetto dal menu a tendina per visualizzarne l'intera struttura, i relativi Work Package e la ripartizione dei singoli task pianificati.</p>
+
+		<div th:if="${errorMsg!=null and !#strings.isEmpty(errorMsg)}" class="error-banner" style="margin-bottom: 20px; background-color: #f8d7da; color: #721c24; padding: 12px; border-radius: 4px; border: 1px solid #f5c6cb;">
+			<p th:text="${errorMsg}">Si è verificato un errore.</p>
+		</div>
+
+		<form th:action="@{/VerifyProjects}" method="GET" class="inline-form" autocomplete="off" style="margin-bottom: 0">
+			<label for="idProgetto" class="form-section-label">Seleziona Progetto:</label>
+			<select id="idProgetto" name="idProgetto" required class="form-select">
+				<option value="" disabled th:selected="${selectedProject==null}">-- Scegli un progetto da verificare --</option>
+				<option th:each="p:${myProjects}"
+						th:value="${p.id}"
+						th:text="${p.nomeProgetto}"
+						th:selected="${selectedProject!=null and p.id==selectedProject.id}">
+				</option>
+			</select>
+			<button type="submit" class="btn-load">Seleziona</button>
+		</form>
+
+		<div th:if="${selectedProject!=null}" class="tasks-scroll-container">
+
+			<div class="sticky-wp-header">
+				<h4>Progetto: <span th:text="${selectedProject.nomeProgetto}">Nome Progetto</span></h4>
+				<div class="wp-validity-info">
+					Stato attuale: <span th:text="${selectedProject.stato}" class="info-stato">STATO</span> |
+					Ore Previste: <span th:text="${totalProjectHours+' ore'}" class="info-ore-previste">0 ore</span> |
+					Ore Lavorate: <span th:text="${totalWorkedHours+' ore'}" class="info-ore-lavorate">0 ore</span>
+				</div>
+			</div>
+
+			<div th:if="${selectedProject.wps == null or selectedProject.wps.isEmpty()}" class="no-tasks-msg">
+				Il progetto non contiene ancora alcun Work Package strutturato.
+			</div>
+
+			<div th:if="${selectedProject.wps != null and !selectedProject.wps.isEmpty()}" class="wp-list">
+				<div th:each="wp, wpStat:${selectedProject.wps}" class="wp-card">
+
+					<div class="wp-card-header">
+						<span class="wp-title" th:text="${'WP '+wpStat.count+' - '+wp.titolo}">WP 1 - Titolo WP</span>
+						<span class="wp-validity-badge" th:text="${'Validità Mesi: '+wp.meseInizio+' - '+wp.meseFine}">Mesi: 1 - 4</span>
+					</div>
+
+					<div th:if="${wp.tasks==null or wp.tasks.isEmpty()}" class="no-tasks-msg">
+						Nessun task presente in questo Work Package.
+					</div>
+
+					<div th:if="${wp.tasks!=null and !wp.tasks.isEmpty()}" class="task-list">
+						<div th:each="t, tStat:${wp.tasks}" class="task-card task-card--row">
+
+							<div class="task-card-body">
+								<div class="task-label" th:text="${'TASK '+tStat.count}">TASK 1</div>
+								<strong class="task-title" th:text="${t.nomeTask}">Nome Task</strong>
+								<p class="task-description" th:text="${t.descrizione}">Descrizione del task</p>
+							</div>
+
+							<div class="task-time-box">
+								<!-- <span class="task-time-label">Pianificazione</span> -->
+								<p class="task-time-mesi" th:text="${'Mesi '+t.meseInizio+' → '+t.meseFine}">Mesi: 1-2</p>
+								<p class="task-time-previste" th:text="${t.orePrevisteTotali+' ore previste'}">40 ore previste</p>
+								<p class="task-time-lavorate" th:text="${t.oreLavorateTotali+' ore lavorate'}">40 ore lavorate</p>
+							</div>
+
+						</div>
+					</div>
+
+				</div>
+			</div>
+
+		</div>
+	</div>
+</body>
+</html>

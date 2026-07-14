@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<title>Monitoraggio Collaboratori</title>
+	<link rel="stylesheet" type="text/css" media="all" href="./css/style.css" th:href="@{./css/style.css}" />
+</head>
+<body>
+	<div class="admin-header">
+		<div class="welcome-section">
+			<img th:src="${user.profilePicturePath!=null?'./img/'+user.profilePicturePath:'./img/defaultProPic.png'}"
+				 alt="Foto Profilo" class="profile-pic" />
+			<p>Benvenuto, <span th:text="${user.nome+' '+ user.cognome}">Manager</span></p>
+		</div>
+		<div class="action-section">
+			<a th:href="@{/Manager}" class="btn-home">Indietro</a>
+		   	<a th:href="@{/MonitorProjects}" class="btn-action btn-action--primary">Monitora Stato Progetti</a>
+			<a th:href="@{/Logout}" class="btn-logout">Logout</a>
+		</div>
+	</div>
+
+	<div class="main-container">
+		<h3>Monitoraggio Collaboratori</h3>
+		<p class="page-subtitle">Seleziona uno dei collaboratori sotto la tua gestione per analizzare i progetti e i relativi Work Package e Task in cui è attualmente attivo.</p>
+
+		<div th:if="${errorMsg!=null and !#strings.isEmpty(errorMsg)}" class="error-banner" style="margin-bottom: 20px; background-color: #f8d7da; color: #721c24; padding: 12px; border-radius: 4px; border: 1px solid #f5c6cb;">
+			<p th:text="${errorMsg}">Si è verificato un errore.</p>
+		</div>
+
+		<div th:if="${msg!=null and !#strings.isEmpty(msg)}" class="success-banner-timeout">
+			<p th:text="${msg}">Operazione completata con successo!</p>
+		</div>
+
+		<form th:action="@{/MonitorCollaborators}" method="GET" class="inline-form form-spacer">
+			<label for="idCollaboratore" class="form-section-label">Seleziona Collaboratore:</label>
+			<select name="idCollaboratore" id="idCollaboratore" required class="form-select">
+				<option value="" disabled th:selected="${selectedCollaborator==null}">-- Scegli un Collaboratore --</option>
+				<option th:each="c:${collaborators}"
+						th:value="${c.id}"
+						th:text="${c.cognome+' '+c.nome}"
+						th:selected="${selectedCollaborator!=null && selectedCollaborator.ID==c.ID}">
+				</option>
+			</select>
+			<button type="submit" class="btn-load">Seleziona</button>
+		</form>
+
+		<div th:if="${selectedCollaborator!=null}">
+
+			<div th:if="${projects==null or projects.isEmpty()}" class="info-warning">
+				Il collaboratore selezionato non risulta assegnato ad alcun Task nei progetti attivi.
+			</div>
+
+			<div th:each="p:${projects}" class="collab-project-block">
+
+				<!-- Contenitore principale (mantiene lo sfondo/stile del blocco) -->
+				<div class="table-box table-box--blue" style="overflow: visible;">
+					
+					<div class="project-info-header">
+						<h4 style="margin: 0 0 10px 0; font-size: 1.2rem;">
+							Progetto: <span th:text="${p.nomeProgetto}" style="font-weight: bold;">NOME PROGETTO</span>
+						</h4>
+						<div style="display: flex; gap: 20px; font-size: inherit;">
+							<div><strong>Stato Operativo:</strong> <span th:text="${p.stato}">STATO</span></div>
+							<div><strong>Durata:</strong> <span class="overview-value overview-value--durata" style="font-size: 1rem" th:text="${p.durata+' Mesi'}">X Mesi</span></div>
+						</div>
+					</div>
+
+					<!-- 2. CONTENITORE TABELLA: Gestisce l'overflow orizzontale in modo indipendente -->
+					<div class="responsive-table-wrapper" style="width: 100%; overflow-x: auto; padding: 15px; box-sizing: border-box;">
+						<table border="1" style="border-collapse: collapse; width: 100%; text-align: center;">
+							<thead>
+								<tr>
+									<th rowspan="2" style="min-width: 150px;">Work Package</th>
+									<th rowspan="2" style="min-width: 180px;">Task Assegnato</th>
+									<th th:each="m:${#numbers.sequence(1, p.durata)}"
+										th:text="${'M'+m}" class="td-durata">MX</th>
+								</tr>
+							</thead>
+							<tbody>
+								<th:block th:each="wp:${p.wps}">
+									<tr th:each="task, iterStat:${wp.tasks}">
+										<td th:if="${iterStat.first}"
+											th:rowspan="${wp.tasks.size()}"
+											th:text="${wp.titolo}"
+											class="td-wp-name">Nome WP</td>
+										<td th:text="${task.nomeTask}" style="text-align: left; padding-left: 10px;">Nome Task</td>
+										<th:block th:each="m:${#numbers.sequence(1, p.durata)}">
+											<td th:text="${task.oreLavorate.containsKey(m)}?${task.oreLavorate.get(m)}:'-'" class="task-time-lavorate">-</td>
+										</th:block>
+									</tr>
+								</th:block>
+							</tbody>
+						</table>
+					</div>
+
+				</div>
+
+			</div>
+		</div>
+
+	</div>
+</body>
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<title>Monitoraggio Stato Progetti</title>
+	<link rel="stylesheet" type="text/css" media="all" href="./css/style.css" th:href="@{./css/style.css}" />
+</head>
+<body>
+	<div class="admin-header">
+		<div class="welcome-section">
+			<img th:src="${user.profilePicturePath != null?'./img/'+user.profilePicturePath:'./img/defaultProPic.png'}"
+				 alt="Foto Profilo" class="profile-pic" />
+			<p>Benvenuto, <span th:text="${user.nome+' '+ user.cognome}">Manager</span></p>
+		</div>
+		<div class="action-section">
+			<a th:href="@{/Manager}" class="btn-home">Indietro</a>
+			<a th:href="@{/MonitorCollaborators}" class="btn-action btn-action--success">Monitora Collaboratori</a>
+			<a th:href="@{/Logout}" class="btn-logout">Logout</a>
+		</div>
+	</div>
+
+	<div class="main-container">
+		<h3>Avanzamento Progetti</h3>
+		<p class="page-subtitle">Seleziona uno dei progetti sotto la tua gestione per analizzare lo stato dei singoli Work Package e la distribuzione mensile delle ore lavorative.</p>
+
+		<div th:if="${errorMsg!=null and !#strings.isEmpty(errorMsg)}" class="error-banner" style="margin-bottom: 20px; background-color: #f8d7da; color: #721c24; padding: 12px; border-radius: 4px; border: 1px solid #f5c6cb;">
+			<p th:text="${errorMsg}">Si è verificato un errore.</p>
+		</div>
+
+		<div th:if="${msg!=null and !#strings.isEmpty(msg)}" class="success-banner-timeout">
+			<p th:text="${msg}">Operazione completata con successo!</p>
+		</div>
+
+		<div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap; margin-bottom: 20px;">
+			<form th:action="@{/MonitorProjects}" method="GET" class="inline-form" style="margin: 0;">
+				<label for="idProgetto" class="form-section-label">Seleziona Progetto:</label>
+				<select name="idProgetto" id="idProgetto" required class="form-select">
+					<option value="" disabled selected>-- Scegli un Progetto --</option>
+					<option th:each="p:${managedProjects}"
+							th:value="${p.id}"
+							th:text="${p.nomeProgetto}"
+							th:selected="${selectedProject!=null && selectedProject.id==p.id}">
+					</option>
+				</select>
+				<button type="submit" class="btn-load">Seleziona</button>
+			</form>
+	
+			<form th:if="${selectedProject!=null && canConclude && selectedProject.stato=='ASSEGNATO'}" th:action="@{/DoConcludeProject}" method="POST" style="margin: 0;">
+				<input type="hidden" name="idProgetto" th:value="${selectedProject.id}" />
+				<button type="submit" class="btn-conclude" style="background-color: #d9534f; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; display: flex; align-items: center;">
+					Concludi Progetto
+				</button>
+			</form>
+			
+		</div>
+
+		<div th:if="${selectedProject!=null}">
+		
+			<div class="project-overview-grid">
+				<div class="overview-card">
+					<h4 class="overview-label">Stato del Progetto</h4>
+					<span class="overview-value overview-value--stato" th:text="${selectedProject.stato}">STATO</span>
+				</div>
+				<div class="overview-card">
+					<h4 class="overview-label">Durata Complessiva</h4>
+					<span class="overview-value overview-value--durata" th:text="${selectedProject.durata+' Mesi'}">X Mesi</span>
+				</div>
+				<div class="overview-card">
+					<h4 class="overview-label">Bilancio Ore (Pianificate / Lavorate)</h4>
+					<span class="overview-value overview-value--bilancio">
+						<span th:text="${totalPlannedHours+'h'}">0h</span> / <span th:text="${totalAllocatedHours+'h'}">0h</span>
+					</span>
+				</div>
+			</div>
+
+			<div class="matrix-table-wrapper">
+				<table border="1" style="border-collapse: collapse; width: 100%; text-align: center;">
+					<thead>
+						<tr>
+							<th rowspan="2" style="min-width: 120px;">Work Package</th>
+							<th rowspan="2" style="min-width: 150px;">Task</th>
+							<th colspan="2" th:each="m:${#numbers.sequence(1, selectedProject.durata)}"
+								th:text="${'M'+m}" class="td-durata">MX</th>
+						</tr>
+						<tr>
+							<th:block th:each="m:${#numbers.sequence(1, selectedProject.durata)}">
+								<th class="th-previste">P</th>
+								<th class="th-lavorate">L</th>
+							</th:block>
+						</tr>
+					</thead>
+					<tbody>
+						<th:block th:each="wp, wpStat:${selectedProject.wps}">
+							<tr th:each="task, taskStat:${wp.tasks}">
+								<td th:if="${taskStat.first}"
+									th:rowspan="${wp.tasks.size()}"
+									th:text="${wpStat.count+'. '+wp.titolo}"
+									class="td-wp-name">
+									Nome WP
+								</td>
+								<td th:text="${wpStat.count+'.'+taskStat.count+' '+task.nomeTask}" style="text-align: left; padding-left: 10px;">Nome Task</td>
+								<th:block th:each="m:${#numbers.sequence(1, selectedProject.durata)}">
+									<td class="task-time-previste" th:text="${task.orePreviste.containsKey(m)}?${task.orePreviste.get(m)}:'-'">-</td>
+									<td class="task-time-lavorate" th:text="${task.oreLavorate.containsKey(m)}?${task.oreLavorate.get(m)}:'-'">-</td>
+								</th:block>
+							</tr>
+						</th:block>
+					</tbody>
+				</table>
+			</div>
+
+		</div>
+	</div>
+</body>
+</html>

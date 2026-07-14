@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<title>Area Responsabile e Gestione Allocazioni</title>
+	<link rel="stylesheet" type="text/css" media="all" href="./css/style.css" th:href="@{./css/style.css}" />
+</head>
+<body>
+	<div class="admin-header">
+		<div class="welcome-section">
+			<img th:src="${user.profilePicturePath!=null?'./img/'+user.profilePicturePath:'./img/defaultProPic.png'}"
+				 alt="Foto Profilo" class="profile-pic" />
+			<p>Benvenuto, <span th:text="${user.nome+' '+ user.cognome}">Manager</span></p>
+		</div>
+		<div class="action-section">
+			<a th:href="@{/MonitorProjects}" class="btn-action btn-action--primary">Monitora Stato Progetti</a>
+			<a th:href="@{/MonitorCollaborators}" class="btn-action btn-action--success">Monitora Collaboratori</a>
+			<a th:href="@{/Logout}" class="btn-logout">Logout</a>
+		</div>
+	</div>
+
+	<div class="main-container">
+		<h3>Gestisci i tuoi progetti</h3>
+		<p class="page-subtitle">Assegna collaboratori e ore mesili per poter avviare il progetto.</p>
+	
+		<div th:if="${errorMsg!=null and !#strings.isEmpty(errorMsg)}" class="error-banner" style="margin-bottom: 20px; background-color: #f8d7da; color: #721c24; padding: 12px; border-radius: 4px; border: 1px solid #f5c6cb;">
+			<p th:text="${errorMsg}">Si è verificato un errore.</p>
+		</div>
+
+		<div th:if="${msg!=null and !#strings.isEmpty(msg)}" class="success-banner-timeout">
+			<p th:text="${msg}" style="margin: 0;">Operazione completata con successo.</p>
+		</div>
+
+		<div class="projects-list-section">
+			<form th:action="@{/Manager}" method="GET" class="inline-form" style="margin-bottom: 20px;">
+				<label for="idProgetto" class="form-section-label">1. Seleziona Progetto:</label>
+				<select name="idProgetto" id="idProgetto" required class="form-select">
+					<option value="" disabled th:selected="${selectedProject==null}">-- Scegli un Progetto --</option>
+					<option th:each="p:${managedProjects}"
+							th:value="${p.id}"
+							th:text="${p.nomeProgetto+' ('+p.stato+')'}"
+							th:selected="${selectedProject!=null && selectedProject.id==p.id}">
+					</option>
+				</select>
+				<button type="submit" class="btn-load">Seleziona</button>
+			</form>
+
+			<div th:if="${selectedProject!=null}">
+				<div class="project-info-summary" style="margin-bottom: 20px; padding: 10px; background: #f9f9f9; border-left: 4px solid #007bff;">
+					<strong>Stato Corrente:</strong> <span th:text="${selectedProject.stato}">STATO</span> | 
+					<strong>Durata:</strong> <span th:text="${selectedProject.durata+' mesi'}">Durata</span>
+				   
+					<form th:action="@{/Manager}" method="POST" style="display:inline; margin-left: 15px;">
+						<input type="hidden" name="idProgetto" th:value="${selectedProject.id}" />
+						<button type="submit" 
+								class="btn-assign"
+								th:disabled="${!isAssignable}"
+								th:classappend="${!isAssignable}?' btn-assign--disabled':''"
+								th:title="${!isAssignable}?'Impossibile assegnare: verifica i requisiti':'Procedi con l\'assegnazione'">
+							Avvia ed Assegna Progetto
+						</button>
+					</form>
+				</div>
+
+				<div th:if="${selectedProject.stato=='CREATO'}">
+					<form th:action="@{/Manager}" method="GET" class="inline-form">
+						<input type="hidden" name="idProgetto" th:value="${selectedProject.id}" />
+						<label for="codiceWP" class="form-section-label">2. Seleziona Work Package:</label>
+						<select name="codiceWP" id="codiceWP" required class="form-select">
+							<option value="" disabled th:selected="${selectedWP==null}">-- Scegli un Work Package --</option>
+							<option th:each="wp:${wps}"
+									th:value="${wp.codiceWP}"
+									th:text="${wp.titolo}"
+									th:selected="${selectedWP!=null && selectedWP.codiceWP==wp.codiceWP}">
+							</option>
+						</select>
+						<button type="submit" class="btn-load">Seleziona</button>
+					</form>
+				</div>
+				
+				<div th:if="${selectedProject.stato!='CREATO'}" class="info-empty">
+					Il progetto selezionato è già stato avviato o concluso. Non è possibile modificare le allocazioni dei Task.
+				</div>
+			</div>
+
+			<div th:if="${selectedWP!=null}" class="tasks-scroll-container" style="margin-top: 25px;">
+				<div class="sticky-wp-header">
+					<h4><span th:text="${selectedWP.titolo}">WP</span></h4>
+					<div class="wp-validity-info">
+						Validità WP: <span th:text="${'Mese '+selectedWP.meseInizio}">1</span>
+						&rarr; <span th:text="${'Mese '+selectedWP.meseFine}">1</span>
+					</div>
+				</div>
+
+				<div th:if="${tasks==null or tasks.isEmpty()}" class="no-tasks-msg">
+					Nessun task pianificato in questo Work Package.
+				</div>
+
+				<div th:if="${tasks!=null and !tasks.isEmpty()}" style="display: flex; flex-direction: column; gap: 25px;">
+					<div th:each="t:${tasks}" class="task-card">
+						<div class="task-card-header">
+							<div class="task-label">TASK</div>
+							<strong class="task-title" th:text="${t.nomeTask}">Nome Task</strong>
+							<p class="task-description" th:text="${t.descrizione}">Descrizione</p>
+						</div>
+
+						<div class="allocation-form-wrapper">
+							<form th:action="@{/DoTaskAllocation}" method="POST" class="allocation-form">
+								<input type="hidden" name="idTask" th:value="${t.id}" />
+								<input type="hidden" name="idProgetto" th:value="${selectedProject.id}" />
+								<input type="hidden" name="codiceWP" th:value="${selectedWP.codiceWP}" />
+
+								<!-- Sezione Collaboratori con logica di ripopolamento in caso di errore su questa specifica scheda -->
+								<div class="collaborators-section">
+									<label class="form-section-label">Collaboratori del Task</label>
+									<p class="form-section-desc">Seleziona i collaboratori da associare a questa pianificazione.</p>
+									<div class="checkbox-list-container">
+										<div th:each="c:${collaborators}" class="checkbox-item">
+											<input type="checkbox"
+												   name="idCollaboratori"
+												   th:id="${'collab_'+t.id+'_'+c.id}"
+												   th:value="${c.id}"
+												   th:checked="${(lastFailedTaskId != null and lastFailedTaskId == #strings.toString(t.id)) ? (submittedCollaboratori != null and submittedCollaboratori.contains(#strings.toString(c.id))) : (t.collaboratori != null and t.collaboratori.contains(c.id))}" />
+											<label th:for="${'collab_'+t.id+'_'+c.id}" th:text="${c.cognome+' '+c.nome}"></label>
+										</div>
+									</div>
+								</div>
+
+								<!-- Sezione Ore con ripopolamento se la richiesta è fallita su questo task -->
+								<div class="hours-section">
+									<div>
+										<label class="form-section-label">Ore Lavorative Mensili</label>
+										<p class="form-section-desc">Includi la stima oraria prevista per ciascun mese di attività del task.</p>
+										<div class="months-grid">
+											<div th:each="mese:${#numbers.sequence(t.meseInizio, t.meseFine)}" class="month-box">
+												<label th:for="${'ore_task_'+t.id+'_mese_'+mese}" class="month-label" th:text="${'Mese '+mese}">Mese X</label>
+												
+												<input type="number"
+													   th:id="${'ore_task_'+t.id+'_mese_'+mese}"
+													   th:name="${'ore_task_'+t.id+'_mese_'+mese}"
+													   th:value="${(lastFailedTaskId != null and lastFailedTaskId == #strings.toString(t.id) and submittedHours != null) ? submittedHours.get('ore_task_'+t.id+'_mese_'+mese) : (t.orePreviste!=null and t.orePreviste.containsKey(mese)?t.orePreviste.get(mese):0)}"
+													   min="0" 
+													   placeholder="0" 
+													   required 
+													   class="month-input" />
+											</div>
+										</div>
+									</div>
+									<button type="submit" class="btn-save-allocation">Salva Allocazione Task</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+
+		</div>
+	</div>
+</body>
+</html>
