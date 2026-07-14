@@ -69,7 +69,8 @@ public class DoLogin extends HttpServlet
 			if(user.isAdmin()) response.sendRedirect(contextPath+"/Admin");
 			else if(user.isManager() && user.isCollaborator()) response.sendRedirect(contextPath+"/ChooseRole");
 			else if(user.isCollaborator()) response.sendRedirect(contextPath+"/Collaborator");
-			else response.sendRedirect(contextPath+"/Manager");
+			else if(user.isManager()) response.sendRedirect(contextPath+"/Manager");
+			else response.sendRedirect(contextPath+"/Login?error_msg="+URLEncoder.encode("Utente non assegnato", "UTF-8"));
 		}
 		catch(CheckAuthException e)
 		{

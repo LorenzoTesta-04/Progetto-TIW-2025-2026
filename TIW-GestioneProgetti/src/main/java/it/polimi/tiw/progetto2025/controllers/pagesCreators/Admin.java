@@ -75,7 +75,7 @@ public class Admin extends HttpServlet
         IWebExchange exchange=this.webApplication.buildExchange(request, response);
         WebContext ctx=new WebContext(exchange, request.getLocale());
 
-        if(!checkAccess.checkAdmin(session, response, getServletContext()))return;
+        if(!checkAccess.checkAdmin(session, response, getServletContext())) return;
         
         User user=(User)session.getAttribute("user");
         UserDAO userDAO=new UserDAO(connection);

@@ -28,14 +28,16 @@ import it.polimi.tiw.progetto2025.daos.UserDAO;
 import it.polimi.tiw.progetto2025.daos.WorkPackageDAO;
 import it.polimi.tiw.progetto2025.utils.checkAccess;
 
-public class MonitorCollaborators extends HttpServlet {
+public class MonitorCollaborators extends HttpServlet 
+{
     private static final long serialVersionUID = 1L;
     private Connection connection = null;
     private TemplateEngine templateEngine;
     private JakartaServletWebApplication webApplication;
 
     @Override
-    public void init() throws ServletException {
+    public void init() throws ServletException 
+    {
         ServletContext servletContext = getServletContext();
         this.webApplication = JakartaServletWebApplication.buildApplication(servletContext);
         
@@ -48,10 +50,13 @@ public class MonitorCollaborators extends HttpServlet {
         this.templateEngine = new TemplateEngine();
         this.templateEngine.setTemplateResolver(templateResolver);
         
-        try {
+        try 
+        {
             new com.mysql.cj.jdbc.Driver();
             this.connection = DriverManager.getConnection(MyDAO.DB_URL, MyDAO.DB_USER, MyDAO.DB_PASS);
-        } catch(SQLException e) {
+        } 
+        catch(SQLException e) 
+        {
             throw new ServletException("Impossibile connettersi al DB nella Servlet MonitorCollaborators", e);
         }
     }

@@ -75,7 +75,6 @@
 	<servlet-mapping>
 	    <servlet-name>Login</servlet-name>
 	    <url-pattern>/Login</url-pattern>
-	    <url-pattern></url-pattern> 
     </servlet-mapping>
 	
 	<servlet>
@@ -169,7 +168,7 @@
 	</servlet-mapping>
 
 	<welcome-file-list>
-		<welcome-file>/Login</welcome-file>
+		<welcome-file>Login</welcome-file>
 	</welcome-file-list>
 	
 </web-app>

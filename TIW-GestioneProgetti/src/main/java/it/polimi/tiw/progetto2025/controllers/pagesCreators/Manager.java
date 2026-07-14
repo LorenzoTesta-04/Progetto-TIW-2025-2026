@@ -68,8 +68,8 @@ public class Manager extends HttpServlet
     @SuppressWarnings("unchecked")
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
-        HttpSession session=request.getSession(false);
-            
+    	HttpSession session=request.getSession(false);
+        
         response.setContentType("text/html");
         response.setCharacterEncoding("UTF-8");
         response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); 
@@ -78,7 +78,7 @@ public class Manager extends HttpServlet
         
         IWebExchange exchange=this.webApplication.buildExchange(request, response);
         WebContext ctx=new WebContext(exchange, request.getLocale());
-    
+
         if(!checkAccess.checkManager(session, response, getServletContext())) return;
 
         User user=(User)session.getAttribute("user");

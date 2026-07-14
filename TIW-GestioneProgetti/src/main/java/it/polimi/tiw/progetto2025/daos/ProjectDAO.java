@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import it.polimi.tiw.progetto2025.beans.Project;
-import it.polimi.tiw.progetto2025.beans.User;
 
 /**
  * Data Access Object (DAO) dedicato alla gestione della persistenza dei Progetti.

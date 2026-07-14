@@ -26,7 +26,6 @@ import it.polimi.tiw.progetto2025.daos.TaskDAO;
 import it.polimi.tiw.progetto2025.daos.WorkPackageDAO;
 import it.polimi.tiw.progetto2025.utils.checkAccess;
 
-
 public class Collaborator extends HttpServlet 
 {
 	private static final long serialVersionUID=1L;
