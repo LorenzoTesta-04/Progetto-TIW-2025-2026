@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Home Amministratore</title>
+	<link rel="stylesheet" type="text/css" href="./css/style.css" />
+	<link rel="icon" type="image/x-icon" href="./img/logo.png">
+</head>
+<body style="visibility: hidden;">
+	<div class="admin-header">
+		<div class="welcome-section">
+			<img id="admin-profile-pic" src="./img/defaultProPic.png" alt="Foto Profilo" class="profile-pic" />
+			<p>Benvenuto, <span id="admin-name">Caricamento...</span></p>
+		</div>
+		<div class="action-section">
+			<a id="btn-toggle-verify" class="btn-action btn-action--warning" style="cursor: pointer;">Verifica Progetti</a>
+			<button type="button" id="btn-toggle-create" class="btn-home hidden-section" style="border: none; cursor: pointer;">Indietro</button>
+			<button type="button" onclick="logout()" class="btn-logout">Logout</button>
+		</div>
+	</div>
+
+	<div class="main-container">
+		
+		<!-- ===================================== -->
+		<!-- SEZIONE 1: CREAZIONE NUOVO PROGETTO   -->
+		<!-- ===================================== -->
+		<div id="section-creation" class="creation-section">
+			<h3>Creazione Nuovo Progetto</h3>
+		<p class="page-subtitle">Compila i moduli sottostanti per inserire un nuovo progetto, definire i relativi WP e pianificare i task.</p>
+	
+		<!-- Banner per Feedback (Successo / Errore) gestito da JS -->
+		<div id="feedback-banner" style="display: none; margin-bottom: 20px; padding: 12px; border-radius: 4px;">
+			<p id="feedback-text"></p>
+		</div>
+
+		<!-- STRUTTURA UNICA DI CREAZIONE -->
+		<form id="bulk-project-form" class="form-vertical" autocomplete="off">
+			<div class="dashboard-forms-grid" style="display: flex; gap: 24px; flex-wrap: wrap; align-items: start;">
+				
+				<!-- COLONNA SINISTRA: DATI GENERALI PROGETTO -->
+				<div class="form-card-section" style="flex: 1; min-width: 320px; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+					<h3>Dati Progetto</h3>
+					<hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+					
+					<div class="form-group" style="margin-bottom: 10px">
+						<label for="nomeProgetto">Titolo Progetto</label>
+						<input type="text" id="nomeProgetto" required class="form-input"/>
+					</div>
+					<div class="form-group" style="margin-bottom: 10px">
+						<label for="durata">Durata (in mesi)</label>
+						<input type="number" id="durata" min="1" required class="form-input"/>
+					</div>
+					<div class="form-group" style="margin-bottom: 10px">
+						<label for="idResponsabile">Tecnico Responsabile</label>
+						<select id="idResponsabile" required class="form-input">
+							<option value="" disabled selected>-- Seleziona un Tecnico --</option>
+						</select>
+					</div>
+
+					<div class="form-actions">
+						<button type="submit" class="btn-submit" style="width: 100%; padding: 12px; font-weight: bold; font-size: 1.1em;">
+							SALVA
+						</button>
+					</div>
+				</div>
+
+				<!-- COLONNA DESTRA: WORK PACKAGES & TASK DINAMICI -->
+				<div class="form-card-section" style="flex: 2; min-width: 450px; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+					<div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <h3>Work Packages (WP) e Task</h3>
+        <div style="display: flex; gap: 8px;">
+            <button type="button" class="btn-secondary" id="btn-undo" title="Annulla (Ctrl+Z)" style="padding: 5px 10px;">↶ Annulla</button>
+            <button type="button" class="btn-secondary" id="btn-redo" title="Ripristina (Ctrl+Y)" style="padding: 5px 10px;">↷ Ripristina</button>
+            <button type="button" class="btn-secondary" id="btn-add-wp" style="font-weight: bold;">+ Aggiungi WP</button>
+        </div>
+    </div>
+					<hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+					
+					<!-- Container dinamico dei WP -->
+					<div id="wp-container">
+						<!-- I WP verranno inseriti qui da JS -->
+					</div>
+				</div>
+
+			</div>
+		</form>
+		</div>
+
+		<!-- ========================================== -->
+		<!-- SEZIONE 2: MONITORAGGIO STATO PROGETTI     -->
+		<!-- ========================================== -->
+		<div id="section-monitor" class="monitor-section hidden-section" style="padding-bottom: 30px;">
+			<h3>Monitoraggio Stato Progetti</h3>
+			<p class="page-subtitle">Seleziona un progetto dal menu a tendina per visualizzarne l'intera struttura, i relativi Work Package e la ripartizione dei singoli task pianificati.</p>
+
+			<div id="form-select-project" class="inline-form" style="margin-bottom: 20px;">
+			    <label for="idProgetto" class="form-section-label">Seleziona Progetto:</label>
+			    <select id="idProgetto" name="idProgetto" required class="form-select">
+			        <option value="" disabled selected>-- Scegli un progetto da verificare --</option>
+			    </select>
+			</div>
+
+			<div id="project-details-container" class="tasks-scroll-container hidden-section">
+				<div class="sticky-wp-header">
+					<h4>Progetto: <span id="view-project-name">Nome Progetto</span></h4>
+					<div class="wp-validity-info">
+						Stato attuale: <span id="view-project-state" class="info-stato">STATO</span> |
+						Ore Previste: <span id="view-project-hours-planned" class="info-ore-previste">0 ore</span> |
+						Ore Lavorate: <span id="view-project-hours-worked" class="info-ore-lavorate">0 ore</span>
+					</div>
+				</div>
+
+				<div id="view-wp-list" class="wp-list"></div>
+			</div>
+			
+			<div id="no-project-msg" class="no-tasks-msg">
+				Nessun progetto selezionato. Scegli un progetto dal menu soprastante.
+			</div>
+		</div>
+
+	</div>
+	<script src="./script/serverCommunication.js"></script>
+    <script src="./script/banner.js"></script>
+    <script src="./script/userInfo.js"></script>
+    <script src="./script/admin.js"></script>
+    <script src="./script/logout.js"></script>
+</body>
+</html>

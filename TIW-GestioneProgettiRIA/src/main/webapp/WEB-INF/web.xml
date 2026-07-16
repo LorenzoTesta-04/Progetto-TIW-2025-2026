@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd" 
+         version="4.0">
+         
+	<display-name>TIW-GestioneProgettiRIA</display-name>
+
+	<servlet>
+		<servlet-name>DoLogin</servlet-name>
+		<servlet-class>it.polimi.tiw.progetto2025.controllers.actionPerformer.DoLogin</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>DoLogin</servlet-name>
+		<url-pattern>/DoLogin</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>DoChooseRole</servlet-name>
+		<servlet-class>it.polimi.tiw.progetto2025.controllers.actionPerformer.DoChooseRole</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>DoChooseRole</servlet-name>
+		<url-pattern>/DoChooseRole</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>DoLogout</servlet-name>
+		<servlet-class>it.polimi.tiw.progetto2025.controllers.actionPerformer.DoLogout</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>DoLogout</servlet-name>
+		<url-pattern>/DoLogout</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>DoSaveProject</servlet-name>
+		<servlet-class>it.polimi.tiw.progetto2025.controllers.actionPerformer.DoSaveProject</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>DoSaveProject</servlet-name>
+		<url-pattern>/DoSaveProject</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>DoSaveHours</servlet-name>
+		<servlet-class>it.polimi.tiw.progetto2025.controllers.actionPerformer.DoSaveHours</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>DoSaveHours</servlet-name>
+		<url-pattern>/DoSaveHours</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>DoTaskAllocation</servlet-name>
+		<servlet-class>it.polimi.tiw.progetto2025.controllers.actionPerformer.DoTaskAllocation</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>DoTaskAllocation</servlet-name>
+		<url-pattern>/DoTaskAllocation</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>DoConcludeProject</servlet-name>
+		<servlet-class>it.polimi.tiw.progetto2025.controllers.actionPerformer.DoConcludeProject</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>DoConcludeProject</servlet-name>
+		<url-pattern>/DoConcludeProject</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>UserInfo</servlet-name>
+		<servlet-class>it.polimi.tiw.progetto2025.controllers.pageCreator.userInfo</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>UserInfo</servlet-name>
+		<url-pattern>/UserInfo</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>Admin</servlet-name>
+		<servlet-class>it.polimi.tiw.progetto2025.controllers.pageCreator.Admin</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>Admin</servlet-name>
+		<url-pattern>/Admin</url-pattern>
+	</servlet-mapping>
+	<servlet>
+		<servlet-name>Manager</servlet-name>
+		<servlet-class>it.polimi.tiw.progetto2025.controllers.pageCreator.Manager</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>Manager</servlet-name>
+		<url-pattern>/Manager</url-pattern>
+	</servlet-mapping>
+	<servlet>
+		<servlet-name>Collaborator</servlet-name>
+		<servlet-class>it.polimi.tiw.progetto2025.controllers.pageCreator.Collaborator</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>Collaborator</servlet-name>
+		<url-pattern>/Collaborator</url-pattern>
+	</servlet-mapping>
+
+
+	<welcome-file-list>
+		<welcome-file>login.html</welcome-file>
+	</welcome-file-list>
+	
+</web-app>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Home Collaboratore</title>
+	<link rel="stylesheet" type="text/css" href="./css/style.css" />
+	<link rel="icon" type="image/x-icon" href="./img/logo.png">
+</head>
+<body style="visibility: hidden">
+	
+	<!-- Header identico a quello dell'Amministratore per coerenza visiva -->
+	<div class="admin-header">
+		<div class="welcome-section">
+			<img id="admin-profile-pic" src="./img/defaultProPic.png" alt="Foto Profilo" class="profile-pic" />
+			<p>Benvenuto, <span id="admin-name">Caricamento...</span></p>
+		</div>
+		<div class="action-section">
+			<button type="button" onclick="logout()" class="btn-logout">Logout</button>
+		</div>
+	</div>
+
+	<div class="main-container">
+		<h3>Rendicontazione Ore Lavorate</h3>
+		<p class="page-subtitle">Seleziona un progetto operativo dall'elenco per inserire o modificare le ore di lavoro effettuate sui singoli task assegnati.</p>
+	
+		<!-- Banner per Feedback uniforme a quello di Admin -->
+		<div id="feedback-banner" style="display: none; margin-bottom: 20px; padding: 12px; border-radius: 4px;">
+			<p id="feedback-text" style="margin: 0; font-weight: bold;"></p>
+		</div>
+
+		<!-- Form di Selezione Progetto -->
+		<div class="inline-form" style="margin-bottom: 25px;">
+			<label for="idProgettoCollaboratore" class="form-section-label">Seleziona Progetto:</label>
+			<select id="idProgettoCollaboratore" class="form-select">
+				<option value="" disabled selected>-- Scegli un Progetto --</option>
+			</select>
+		</div>
+
+		<!-- Sezione Griglia interattiva -->
+		<div id="collaborator-matrix-section" class="hidden-section">
+			<div class="matrix-table-wrapper" style="overflow-x: auto; width: 100%;">
+				<table border="1" id="collaborator-hours-table" style="border-collapse: collapse; width: 100%; text-align: center;">
+					<!-- Popolato dinamicamente da JS -->
+				</table>
+			</div>
+			
+			<p class="form-section-desc" style="font-style: italic;">
+				Fai clic all'interno di una cella oraria per modificarne il valore. Premi "Invio" o fai clic fuori dalla cella per salvare automaticamente le ore inserite.
+			</p>
+		</div>
+
+		<!-- Messaggio di default se nessun progetto è selezionato -->
+		<div id="no-project-selected-msg" class="no-tasks-msg">
+			Nessun progetto selezionato. Scegli un elemento dal menu per visualizzare il registro delle ore lavorate.
+		</div>
+	</div>
+
+	<script src="./script/serverCommunication.js"></script>
+    <script src="./script/banner.js"></script>
+    <script src="./script/userInfo.js"></script>
+	<script src="./script/collaborator.js"></script>
+    <script src="./script/logout.js"></script>
+</body>
+</html>

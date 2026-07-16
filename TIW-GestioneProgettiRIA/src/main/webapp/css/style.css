@@ -1,0 +1,969 @@
+@charset "UTF-8";
+
+/* ==========================================================================
+   PALETTE COLORI — variabili globali (intera applicazione)
+   ========================================================================== */
+:root {
+    /* Stato progetto */
+    --color-stato-creato:         #e67e22;
+    --color-stato-creato-bg:      #fef3e2;
+    --color-stato-creato-text:    #a85a0a;
+    --color-stato-assegnato:      #2980b9;
+    --color-stato-assegnato-bg:   #e6f1fb;
+    --color-stato-assegnato-text: #185fa5;
+    --color-stato-concluso:       #27ae60;
+    --color-stato-concluso-bg:    #eaf3de;
+    --color-stato-concluso-text:  #3b6d11;
+
+    /* Struttura progetto */
+    --color-titolo:       #2c3e50;   /* nome progetto, responsabile, testi primari */
+    --color-wp:            #27ae60;   /* titolo WP */
+    --color-task-label:    #2980b9;   /* etichetta "TASK N" e azioni primarie */
+    --color-task-title:    #2c3e50;   /* nome task */
+
+    /* Informazioni temporali */
+    --color-mesi:          #7f8c8d;   /* durata, mese inizio/fine */
+    --color-mesi-header:   #888780;   /* intestazioni colonne M1, M2… */
+
+    /* Ore lavorative */
+    --color-ore-previste:  #e67e22;   /* pianificate (P) */
+    --color-ore-lavorate:  #27ae60;   /* consuntivo (L) */
+    --color-bilancio:      #2980b9;   /* totale aggregato P / L */
+
+    /* Persone */
+    --color-collaboratore: #5f5e5a;
+
+    /* Feedback di sistema */
+    --color-errore:        #c0392b;
+    --color-errore-bg:     #fde8e8;
+    --color-successo:      #155724;
+    --color-successo-bg:   #d4edda;
+    --color-disabilitato:  #7f8c8d;
+
+    /* UI generica */
+    --color-header-bg:     #2c3e50;
+    --color-sfondo:        #f4f6f9;
+    --color-bordo:         #e0e0e0;
+    --color-riga-hover:    #f9fbfd;
+}
+
+
+/* ==========================================================================
+   RESET E BASE
+   ========================================================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: var(--color-sfondo);
+    color: #333;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-y:auto
+}
+
+/* Variante body per le pagine di Login / Scelta Ruolo (card centrata) */
+body.login-page {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    overflow: visible;
+}
+
+
+/* ==========================================================================
+   LOGIN E SCELTA RUOLO
+   ========================================================================== */
+.login-box {
+    background: white;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 400px;
+}
+
+.login-box h2 { text-align: center; margin-top: 0; }
+.login-box h4 { text-align: center; color: #555; margin-bottom: 10px; font-weight: normal; }
+
+.login-box input[type="text"],
+.login-box input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin: 0px 0px 10px 0px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.login-box input[type="button"] {
+    width: 100%;
+    padding: 10px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+.login-box input[type="button"]:hover { background-color: #0056b3; }
+
+.login-error {
+    padding: 10px;
+    margin: 10px 0;
+    background-color: var(--color-errore-bg);
+    border: 1px solid var(--color-errore);
+    border-radius: 4px;
+    color: var(--color-errore);
+    text-align: center;
+}
+
+.roles-selection  { margin-top: 0px; }
+.role-form        { margin-bottom: 10px; }
+
+.roles-selection input[type="button"] {
+    width: 100%;
+    padding: 10px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-bottom: 10px
+}
+.roles-selection input[type="button"]:hover { background-color: #0056b3; }
+
+.logout-section   { text-align: center; }
+.logout-link      { text-decoration: none; color: var(--color-mesi); font-size: 0.9em; }
+.logout-link:hover{ color: #555; }
+
+
+/* ==========================================================================
+   HEADER E NAVIGAZIONE (Admin / Manager)
+   ========================================================================== */
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--color-header-bg);
+    color: #ffffff;
+    padding: 15px 30px;
+    height: 70px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.welcome-section { display: flex; align-items: center; gap: 12px; }
+
+.profile-pic {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #ccc;
+}
+
+.action-section { display: flex; align-items: center; gap: 15px; }
+
+
+/* ==========================================================================
+   PULSANTI — navigazione
+   ========================================================================== */
+.btn-logout {
+    background-color: #e74c3c;
+    color: white;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+}
+.btn-logout:hover { background-color: var(--color-errore); }
+
+.btn-home {
+    background-color: #ecf0f1;
+    color: var(--color-titolo);
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    border: 1px solid #bdc3c7;
+    transition: background 0.2s ease, color 0.2s ease;
+    cursor: pointer;
+}
+.btn-home:hover { background-color: #d5dbdb; color: #1a252f; }
+
+
+/* ==========================================================================
+   PULSANTI — azioni dashboard (Admin / Manager)
+   ========================================================================== */
+.action-buttons {
+    display: flex;
+    gap: 15px;
+    background-color: #f5f5f5;
+    border-radius: 5px;
+    margin-bottom: 30px;
+}
+
+.btn-action {
+    padding: 10px;
+    text-decoration: none;
+    border-radius: 3px;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+.btn-action--primary  { background: var(--color-task-label); color: white; }
+.btn-action--success  { background: #28a745;                  color: white; }
+.btn-action--info     { background: #17a2b8;                  color: white; }
+.btn-action--warning  { background: #ffc107;                  color: #1a1a1a; margin-left: auto; }
+
+.btn-action-wp {
+    padding: 6px 12px;
+    background-color: var(--color-wp);
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+.btn-action-task {
+    padding: 6px 12px;
+    background-color: var(--color-task-label);
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+
+.btn-gestisci {
+    padding: 6px 12px;
+    background-color: var(--color-titolo);
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+.btn-gestisci--disabled {
+    background-color: #bdc3c7;
+    color: #7f8c8d;
+    pointer-events: none;
+    cursor: not-allowed;
+}
+
+.btn-assign {
+    padding: 6px 12px;
+    background-color: #e74c3c;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+.btn-assign--disabled {
+	padding: 6px 12px;
+    background-color: #cccccc !important;
+    color: #666666 !important;
+    cursor: not-allowed;
+    pointer-events: none;
+    text-decoration: none;
+}
+
+
+/* ==========================================================================
+   PULSANTI — form (salvataggio / caricamento)
+   ========================================================================== */
+.btn-submit {
+    padding: 10px 20px;
+    background-color: var(--color-task-label);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.95rem;
+}
+.btn-submit:hover { background-color: #1f6fa3; }
+
+.btn-load {
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    background-color: var(--color-titolo);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    white-space: nowrap;
+    height: 100%;
+}
+.btn-load:hover { background-color: #1a252f; }
+
+.btn-save-allocation {
+    background-color: var(--color-ore-lavorate);
+    border: none;
+    padding: 10px 15px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    cursor: pointer;
+    width: 100%;
+    border-radius: 4px;
+    color: white;
+    margin-top: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: background-color 0.2s;
+}
+.btn-save-allocation:hover { background-color: #219653; }
+
+
+/* ==========================================================================
+   LAYOUT PRINCIPALE
+   ========================================================================== */
+.main-container {
+    flex: 1;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+}
+
+.main-container h2,
+.main-container h3 { margin-bottom: 15px; color: var(--color-titolo); }
+
+.page-subtitle { color: var(--color-mesi); font-size: 0.95rem; margin-bottom: 15px; }
+
+.projects-list-section h3 { color: var(--color-titolo); }
+
+.project-name-accent { color: var(--color-task-label); }
+
+
+/* ==========================================================================
+   TABELLA PROGETTI
+   ========================================================================== */
+.projects-scroll-container {
+    flex: 1;
+    background-color: #ffffff;
+    border: 1px solid var(--color-bordo);
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    overflow-y: auto;
+    max-height: 100%;
+}
+
+table { width: 100%; border-collapse: collapse; }
+
+th, td { padding: 12px 15px; text-align: center; border-bottom: 1px solid #eee; }
+
+th {
+    background-color: #f8f9fa;
+    position: sticky;
+    top: 0;
+    color: var(--color-titolo);
+    z-index: 1;
+}
+
+tr:hover { background-color: var(--color-riga-hover); }
+
+.thead-dark th { background-color: var(--color-header-bg); color: white; }
+
+.td-name     { font-weight: bold; color: var(--color-titolo); }
+.td-durata   { color: var(--color-mesi); }
+.td-empty    { padding: 20px; text-align: center; color: #999; font-style: italic; }
+.td-wp-name  { font-weight: bold; padding: 8px; background-color: #f1f5f9; color: var(--color-titolo); }
+.text-frozen { color: var(--color-disabilitato); font-style: italic; font-size: 0.85rem; }
+
+.th-previste { color: var(--color-ore-previste); }
+.th-lavorate { color: var(--color-ore-lavorate); }
+
+
+/* ==========================================================================
+   BADGE DI STATO PROGETTO
+   ========================================================================== */
+.status-badge { font-weight: bold; font-size: 0.85em; padding: 3px 8px; border-radius: 3px; }
+
+.status-created {
+    background-color: var(--color-stato-creato-bg);
+    color: var(--color-stato-creato-text);
+    border: 1px solid var(--color-stato-creato);
+}
+.status-assigned {
+    background-color: var(--color-stato-assegnato-bg);
+    color: var(--color-stato-assegnato-text);
+    border: 1px solid var(--color-stato-assegnato);
+}
+.status-concluded {
+    background-color: var(--color-stato-concluso-bg);
+    color: var(--color-stato-concluso-text);
+    border: 1px solid var(--color-stato-concluso);
+}
+
+
+/* ==========================================================================
+   FORM — struttura comune (createProject / createWP / createTask / allocazioni)
+   ========================================================================== */
+.form-vertical { display: flex; flex-direction: column; gap: 15px; }
+
+.form-step { margin-bottom: 25px; background: #f8f9fa; padding: 15px; border-radius: 4px; }
+.form-spacer { margin-bottom: 15px; }
+
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+
+.form-group label,
+.form-section-label { font-weight: bold; color: var(--color-titolo); }
+
+.form-input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 0.95rem;
+}
+
+.form-row { display: flex; gap: 10px; align-items: flex-end; }
+.form-row .form-input { flex-grow: 1; }
+
+.form-actions { margin-top: 10px; }
+
+.inline-form { display: flex; gap: 10px; align-items: center; margin-bottom: 15px; }
+
+.form-select { padding: 8px; min-width: 280px; border: 1px solid #ccc; border-radius: 4px; }
+
+.form-section-desc { font-size: 0.75rem; color: var(--color-mesi); margin: 0 0 10px 0; }
+
+
+/* ==========================================================================
+   CONTENITORE TASK (SCROLLABILE — Manager)
+   ========================================================================== */
+.tasks-scroll-container {
+    margin-top: 20px;
+    background: #fff;
+    border: 1px solid var(--color-task-label);
+    border-radius: 6px;
+    padding: 20px;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+.tasks-scroll-container::-webkit-scrollbar { display: none; }
+
+
+/* ==========================================================================
+   INTESTAZIONE FISSA DEL WORK PACKAGE
+   ========================================================================== */
+.sticky-wp-header {
+    position: sticky;
+    top: -20px;
+    background: #fff;
+    margin: -20px -20px 20px -20px;
+    padding: 20px 20px 15px 20px;
+    border-bottom: 2px solid var(--color-task-label);
+    z-index: 10;
+}
+
+.sticky-wp-header h4 { color: var(--color-wp); margin: 0 0 5px 0; font-size: 1.2rem; }
+
+.wp-validity-info { font-size: 0.85rem; color: var(--color-mesi); font-weight: bold; }
+.wp-validity-info span               { color: var(--color-titolo); }
+.wp-validity-info .info-stato        { color: var(--color-stato-creato); text-transform: uppercase; }
+.wp-validity-info .info-ore-previste { color: var(--color-ore-previste); }
+.wp-validity-info .info-ore-lavorate { color: var(--color-ore-lavorate); }
+
+
+/* ==========================================================================
+   SCHEDA SINGOLO TASK
+   ========================================================================== */
+.task-card {
+    background: #f8f9fa;
+    border: 1px solid #dcdde1;
+    padding: 20px;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.task-card--row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: none;
+}
+
+.task-card-header { border-bottom: 1px dashed #ccc; padding-bottom: 12px; }
+.task-card-body   { flex: 1; padding-right: 20px; }
+
+.task-label {
+    font-size: 0.9rem;
+    color: var(--color-task-label);
+    font-weight: bold;
+    margin-bottom: 2px;
+}
+
+.task-title { color: var(--color-task-title); font-size: 1.1rem; }
+
+.task-description {
+    margin: 6px 0 0 0;
+    font-size: 0.88rem;
+    color: var(--color-collaboratore);
+    line-height: 1.4;
+}
+
+
+/* ==========================================================================
+   BOX TEMPORALE (destra nella verifyProjects)
+   ========================================================================== */
+.task-time-box {
+    text-align: right;
+    min-width: 150px;
+    background: #fff;
+    padding: 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+}
+
+.task-time-label {
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: var(--color-mesi);
+    text-transform: uppercase;
+    display: block;
+}
+
+.task-time-mesi     { font-size: 0.9rem; font-weight: bold; color: var(--color-titolo);       margin: 2px 0; }
+.task-time-previste { font-size: 0.9rem; font-weight: bold; color: var(--color-ore-previste); margin: 2px 0; }
+.task-time-lavorate { font-size: 0.9rem; font-weight: bold; color: var(--color-ore-lavorate); margin: 2px 0; }
+
+
+/* ==========================================================================
+   LISTA WP E BLOCCO SINGOLO WP (verifyProjects)
+   ========================================================================== */
+.wp-list   { display: flex; flex-direction: column; gap: 25px; }
+.task-list { display: flex; flex-direction: column; gap: 10px; }
+
+.wp-card { background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 20px; }
+
+.wp-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--color-wp);
+    padding-bottom: 8px;
+    margin-bottom: 15px;
+}
+
+.wp-title { font-size: 1.1rem; color: var(--color-titolo); font-weight: bold; }
+
+.wp-validity-badge {
+    font-size: 0.85rem;
+    background: var(--color-wp);
+    color: white;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-weight: bold;
+}
+
+
+/* ==========================================================================
+   RIEPILOGO PROGETTO — griglia 3 colonne (monitorProjects)
+   ========================================================================== */
+.project-overview-grid {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    padding: 20px;
+    border-radius: 6px;
+    margin-bottom: 25px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    align-items: center;
+}
+
+.overview-card { padding-right: 20px; }
+.overview-card + .overview-card { border-left: 1px solid #cbd5e1; padding-left: 40px; }
+
+.overview-label {
+    margin: 0 0 5px 0;
+    color: var(--color-titolo);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+}
+
+.overview-value           { font-size: 1.1rem; font-weight: bold; }
+.overview-value--stato    { color: var(--color-ore-previste); }
+.overview-value--durata   { color: var(--color-task-label); }
+.overview-value--bilancio { color: var(--color-ore-lavorate); }
+
+
+/* ==========================================================================
+   TABELLA MATRICE (monitorProjects)
+   ========================================================================== */
+.matrix-table-wrapper {
+    background: #fff;
+    border: 1px solid #b4c6e7;
+    border-radius: 6px;
+    margin-bottom: 25px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    overflow-x: auto;
+}
+
+
+/* ==========================================================================
+   FORM DI ALLOCAZIONE (manageProjectAllocations)
+   ========================================================================== */
+.allocation-form-wrapper {
+    background: #fff;
+    padding: 15px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+}
+
+.allocation-form {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: 20px;
+}
+
+.collaborators-section { flex: 1; display: flex; flex-direction: column; }
+.collaborators-section .form-section-label { border-bottom: 2px solid var(--color-task-label); }
+
+.checkbox-list-container {
+    max-height: 160px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 10px;
+    background: #fff;
+}
+
+.checkbox-item { display: flex; align-items: center; margin-bottom: 8px; gap: 8px; cursor: pointer; }
+.checkbox-item label { cursor: pointer; margin: 0; font-weight: normal; color: var(--color-collaboratore); }
+
+.hours-section {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border-left: 1px solid #e2e8f0;
+    padding-left: 20px;
+    gap: 10px;
+}
+
+.hours-section .form-section-label { border-bottom: 2px solid var(--color-ore-previste); margin-bottom: 8px; }
+.hours-section .form-section-desc  { margin-bottom: 10px; }
+
+.months-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+
+.month-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #f1f5f9;
+    padding: 6px;
+    border-radius: 4px;
+    min-width: 80px;
+    border: 1px solid #e2e8f0;
+}
+
+.month-label {
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: var(--color-mesi-header);
+    margin-bottom: 4px;
+}
+
+.month-input {
+    width: 65px;
+    padding: 5px;
+    font-size: 0.85rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 3px;
+    text-align: center;
+}
+
+
+/* ==========================================================================
+   MESSAGGI DI SISTEMA
+   ========================================================================== */
+.no-tasks-msg { font-style: italic; color: var(--color-disabilitato); padding: 10px 0; }
+
+.info-empty {
+    padding: 15px;
+    background: #e2e3e5;
+    color: #383d41;
+    border-radius: 4px;
+    border: 1px solid #d6d8db;
+    margin-top: 20px;
+}
+
+.error-banner {
+    color: var(--color-errore);
+    background-color: var(--color-errore-bg);
+    padding: 10px;
+    border: 1px solid var(--color-errore);
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.success-banner-timeout {
+    color: var(--color-successo);
+    background-color: var(--color-successo-bg);
+    padding: 10px;
+    border: 1px solid #c3e6cb;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    animation: fadeOutAndHide 5s forwards;
+    overflow: hidden;
+}
+
+@keyframes fadeOutAndHide {
+    0%   { opacity: 1; max-height: 100px; padding: 10px; margin-bottom: 20px; border-width: 1px; }
+    80%  { opacity: 1; max-height: 100px; padding: 10px; margin-bottom: 20px; border-width: 1px; }
+    95%  { opacity: 0; max-height: 100px; padding: 10px; margin-bottom: 20px; border-width: 1px; }
+    100% { opacity: 0; max-height: 0;     padding: 0;    margin-bottom: 0;    border-width: 0;   }
+}
+
+
+/* ==========================================================================
+   COLLABORATOR — inserimento ore di lavoro
+   ========================================================================== */
+
+/* Link cliccabile del task nella tabella */
+.task-link {
+    color: var(--color-task-label);
+    text-decoration: none;
+    font-weight: bold;
+}
+.task-link:hover { text-decoration: underline; color: #1a5276; }
+
+/* Riga evidenziata (task selezionato) */
+.selected-row { background-color: #e8f4f8 !important; }
+
+/* Cella nome WP nella tabella collaborator */
+.td-wp-cell {
+    font-weight: bold;
+    background-color: #f8fafc;
+    padding: 10px;
+    border: 1px solid #cbd5e1;
+}
+
+/* Cella task nella tabella collaborator */
+.td-task-cell { padding: 10px; border: 1px solid #cbd5e1; }
+
+/* Box dettaglio task selezionato */
+.details-box {
+    background: #fff;
+    border: 2px solid var(--color-task-label);
+    border-radius: 6px;
+    padding: 20px;
+    margin-top: 0px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.details-box h4 {
+    margin: 0 0 15px 0;
+    color: var(--color-task-label);
+    font-size: 1.2rem;
+    border-bottom: 1px solid #cbd5e1;
+    padding-bottom: 5px;
+}
+
+/* Griglia info task (2 colonne) */
+.task-details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    font-size: 0.95rem;
+    margin-bottom: 20px;
+}
+
+/* Form interno al details-box */
+.task-hours-form {
+    background: #f8fafc;
+    padding: 15px;
+    border-radius: 4px;
+    border: 1px solid #cbd5e1;
+}
+
+/* Riga orizzontale: mese + ore + bottone */
+.task-hours-row {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    margin-top: 15px;
+}
+
+.task-hours-row label { font-weight: bold; margin-right: 5px; }
+
+.select-mese,
+.input-ore {
+    padding: 8px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    font-size: 0.95rem;
+}
+
+.input-ore { width: 70px; text-align: center; }
+
+/* Bottone salva ore (verde — consuntivo) */
+.btn-save {
+    background-color: var(--color-ore-lavorate);
+    color: white;
+    border: none;
+    padding: 9px 20px;
+    font-size: 0.95rem;
+    font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.btn-save:hover { background-color: #219653; }
+
+/* Banner progetto attivo */
+.project-active-banner {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+}
+
+.project-active-banner .label { font-size: 1rem; font-weight: bold; color: var(--color-titolo); }
+.project-active-banner .value { font-size: 1.1rem; font-weight: bold; color: var(--color-task-label); }
+
+/* Contenitore tabella con scroll orizzontale */
+.table-box {
+    background: #fff;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    overflow-x: auto;
+}
+
+.table-box--blue { border-color: #b4c6e7; }
+
+/* Intestazione tabella chiara */
+.thead-light tr { background-color: #f1f5f9; text-align: center; }
+.thead-light th  { padding: 10px; }
+
+
+/* ==========================================================================
+   MONITOR COLLABORATORS — monitoraggio collaboratori (manager)
+   ========================================================================== */
+
+/* Banner avviso: collaboratore senza task */
+.info-warning {
+    padding: 15px;
+    background: #fff3cd;
+    color: #856404;
+    border-radius: 4px;
+    border: 1px solid #ffeeba;
+    margin-bottom: 25px;
+}
+
+/* Blocco per singolo progetto */
+.collab-project-block { margin-bottom: 20px; }
+
+.project-info-header {
+	padding: 15px; 
+	background-color: rgba(255,255,255,0.1); 
+	border-bottom: 1px solid rgba(0,0,0,0.1); 
+	border-radius: 4px 4px 0 0;
+}
+
+.hidden-section {
+	display: none !important;
+}
+.wp-card {
+	background: #f9f9f9;
+	border: 1px solid #ddd;
+	padding: 15px;
+	border-radius: 6px;
+	margin-bottom: 20px;
+	position: relative;
+}
+.task-card {
+	background: #ffffff;
+	border-left: 4px solid #007bff;
+	border-top: 1px solid #eee;
+	border-right: 1px solid #eee;
+	border-bottom: 1px solid #eee;
+	padding: 12px;
+	border-radius: 4px;
+	margin-top: 10px;
+	position: relative;
+}
+.btn-danger {
+	background-color: #dc3545;
+	color: white;
+	border: none;
+	padding: 5px 10px;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 0.85em;
+}
+.btn-danger:hover {
+	background-color: #bd2130;
+}
+.btn-secondary {
+	background-color: #6c757d;
+	color: white;
+	border: none;
+	padding: 8px 12px;
+	border-radius: 4px;
+	cursor: pointer;
+}
+.btn-secondary:hover {
+	background-color: #5a6268;
+}
+.section-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 15px;
+}
+
+.task-card textarea.form-input {
+    resize: vertical;
+}
+
+/* Indica che il task può essere afferrato */
+.task-card[draggable="true"] {
+    cursor: grab;
+}
+
+.task-card[draggable="true"]:active {
+    cursor: grabbing;
+    opacity: 0.6;
+}
+
+.task-card.dragging {
+    opacity: 0.4;
+    border: 2px dashed #0056b3;
+}
+
+/* Linea scura e marcata che indica il punto esatto di inserimento */
+.drag-placeholder {
+    height: 4px;
+    background-color: #0056b3;
+    margin: 8px 0;
+    border-radius: 2px;
+    transition: all 0.1s ease;
+}
+

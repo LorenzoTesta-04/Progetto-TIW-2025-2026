@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestione e Rendicontazione Progetti</title>
+    <link rel="stylesheet" type="text/css" href="./css/style.css" />
+    <link rel="icon" type="image/x-icon" href="./img/logo.png">
+</head>
+<body class="login-page">
+    <div class="login-box">
+	
+	    <div id="login-container">
+	        <h2>Gestione e Rendicontazione Progtti</h2>
+			<h4>Inserisci le credenziali per accedere</h4>
+	        <form autocomplete="off">
+	            <input type="text" name="username" placeholder="Username" required>
+	            <input type="password" name="password" placeholder="Password" required>
+	            <div id="feedback-banner" style="display: none; margin-bottom: 20px; padding: 12px; border-radius: 4px;">
+					<p id="feedback-text"></p>
+				</div>
+	            <input type="button" id="login-button" value="Login">
+	        </form>
+	    </div>
+	
+	    <div id="role-container" style="display:none">
+	        <h2>Benvenuto, <span id="user-fullname"></span></h2>
+	        <h4>Seleziona il ruolo con cui accedere</h4>
+	        
+	        <div class="roles-selection">
+	            <form id="form-manager">
+	                <input type="hidden" name="chosenRole" value="MANAGER">
+	                <input type="button" id="btn-manager" value="Manager">
+	            </form>
+	            
+	            <form id="form-collaborator">
+	                <input type="hidden" name="chosenRole" value="COLLABORATORE">
+	                <input type="button" id="btn-collaborator" value="Collaboratore">
+	            </form>
+	        </div>
+	        
+	         <div class="logout-section">
+	            <a href="DoLogout" class="logout-link">Logout</a>
+	        </div>
+	    </div>
+	</div>
+	<script src="./script/serverCommunication.js"></script>
+    <script src="./script/banner.js"></script>
+    <script src="./script/login-manager.js"></script>
+</body>
+</html>

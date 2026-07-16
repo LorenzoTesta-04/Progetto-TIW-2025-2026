@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Home Responsabile</title>
+	<link rel="stylesheet" type="text/css" href="./css/style.css" />
+	<link rel="icon" type="image/x-icon" href="./img/logo.png">
+</head>
+<body style="visibility: hidden">
+	
+	<div class="admin-header">
+		<div class="welcome-section">
+			<img id="admin-profile-pic" src="./img/defaultProPic.png" alt="Foto Profilo" class="profile-pic" />
+			<p>Benvenuto, <span id="admin-name">Caricamento...</span></p>
+		</div>
+		<div class="action-section">
+			<button type="button" id="btn-back-to-allocation" class="btn-action btn-action--primary" style="border: none; cursor: pointer;">Gestione Allocazioni</button>	
+			<button type="button" id="btn-show-monitor-proj" class="btn-action btn-action--success" style="border: none; cursor: pointer;">Monitoraggio Progetti</button>
+			<button type="button" id="btn-show-monitor-collab" class="btn-action btn-action--warning" style="border: none; cursor: pointer;">Monitoraggio Collaboratori</button>			
+			<button type="button" onclick="logout()" class="btn-logout">Logout</button>
+		</div>
+	</div>
+
+	<div class="main-container">
+		
+		<div id="feedback-banner" style="display: none; margin-bottom: 20px; padding: 12px; border-radius: 4px;">
+			<p id="feedback-text" style="margin: 0; font-weight: bold;"></p>
+		</div>
+
+		<!-- SEZIONE ALLOCAZIONE (STRUTTURA SIMILE A THYMELEAF) -->
+		<div id="section-allocation" class="manager-section">
+			<h3>Gestisci i tuoi progetti</h3>
+			<p class="page-subtitle">Assegna collaboratori e ore mensili per poter avviare il progetto.</p>
+		
+			<div class="projects-list-section">
+				
+				<div class="inline-form" style="margin-bottom: 20px;">
+					<label for="idProgetto" class="form-section-label">Seleziona Progetto:</label>
+					<select id="idProgetto" class="form-select" required>
+						<option value="" disabled selected>-- Scegli un Progetto --</option>
+					</select>
+				</div>
+
+				<div id="project-status-info-wrapper" class="project-info-summary hidden-section" style="margin-bottom: 20px; padding: 10px; background: #f9f9f9; border-left: 4px solid #007bff; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+					<div>
+						<strong>Stato Corrente:</strong> <span id="project-status-info">STATO</span>
+					</div>
+					<div id="project-start-container">
+						<button type="button" id="btn-start-project" class="btn-assign" style="border: none; cursor: pointer;">
+							Assegna ed Avvia Progetto
+						</button>
+					</div>
+				</div>
+
+				<div id="project-not-creato-msg" class="info-empty hidden-section" style="margin-bottom: 20px;">
+					Il progetto selezionato è già stato avviato o concluso. Non è possibile modificare le allocazioni dei Task.
+				</div>
+
+				<div id="wp-select-container" class="inline-form  hidden-section" style="margin-bottom: 20px;">
+					<label for="codiceWP" class="form-section-label">Seleziona Work Package:</label>
+					<select id="codiceWP" class="form-select" required>
+						<option value="" disabled selected>-- Scegli un Work Package --</option>
+					</select>
+				</div>
+				
+				<div id="tasks-allocation-container" class="tasks-scroll-container hidden-section" style="margin-top: 25px;">
+					<div class="sticky-wp-header">
+						<h4><span id="allocation-wp-title">Nome WP</span></h4>
+						<div class="wp-validity-info">
+							Validità WP: <span id="allocation-wp-validity">Mese X &rarr; Mese Y</span>
+						</div>
+					</div>
+
+					<div id="allocation-tasks-list" style="display: flex; flex-direction: column; gap: 25px;">
+					</div>
+				</div>
+				
+				<div id="no-wp-selected-msg" class="no-tasks-msg">
+					Nessun Work Package selezionato. Scegli un progetto e un WP dai menu soprastanti.
+				</div>
+			</div>
+		</div>
+
+		<div id="section-monitor-projects" class="manager-section hidden-section">
+			<h3>Avanzamento Progetti</h3>
+			<p class="page-subtitle">Visualizza la struttura complessiva dei progetti, i relativi Work Package e la distribuzione mensile delle ore lavorative.</p>
+
+			<div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap; margin-bottom: 20px;">
+				<div>
+					<label for="idProgettoMonitor" class="form-section-label">Seleziona Progetto:</label>
+					<select id="idProgettoMonitor" class="form-select">
+						<option value="" disabled selected>-- Scegli un Progetto --</option>
+					</select>
+				</div>
+				<div id="project-conclude-container" class="hidden-section">
+					<button type="button" id="btn-conclude-project" class="btn-conclude" style="background-color: #d9534f; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">
+						Concludi Progetto
+					</button>
+				</div>
+			</div>
+
+			<div id="project-monitor-details" class="hidden-section">
+				<div class="project-overview-grid" style="margin-bottom: 20px;">
+					<div class="overview-card">
+						<h4 class="overview-label">Stato del Progetto</h4>
+						<span id="mon-proj-state" class="overview-value overview-value--stato">STATO</span>
+					</div>
+					<div class="overview-card">
+						<h4 class="overview-label">Durata Complessiva</h4>
+						<span id="mon-proj-duration" class="overview-value overview-value--durata">X Mesi</span>
+					</div>
+					<div class="overview-card">
+						<h4 class="overview-label">Bilancio Ore (Pianificate / Lavorate)</h4>
+						<span class="overview-value overview-value--bilancio">
+							<span id="mon-proj-planned-hours">0h</span> / <span id="mon-proj-worked-hours">0h</span>
+						</span>
+					</div>
+				</div>
+
+				<div class="matrix-table-wrapper" style="overflow-x: auto; width: 100%;">
+					<table border="1" id="project-monitor-table" style="border-collapse: collapse; width: 100%; text-align: center;"></table>
+				</div>
+			</div>
+
+			<div id="no-monitor-project-msg" class="no-tasks-msg">
+				Nessun progetto selezionato per il monitoraggio.
+			</div>
+		</div>
+
+		<div id="section-monitor-collaborators" class="manager-section hidden-section">
+			<h3>Monitoraggio Collaboratori</h3>
+			<p class="page-subtitle">Analizza la distribuzione del carico orario dei singoli collaboratori all'interno dei progetti sotto la tua gestione.</p>
+
+			<div class="inline-form form-spacer" style="margin-bottom: 20px;">
+				<label for="idCollaboratoreMonitor" class="form-section-label">Seleziona Collaboratore:</label>
+				<select id="idCollaboratoreMonitor" class="form-select">
+					<option value="" disabled selected>-- Scegli un Collaboratore --</option>
+				</select>
+			</div>
+
+			<div id="collaborator-monitor-details" class="hidden-section">
+				<div id="collaborator-projects-container"></div>
+			</div>
+
+			<div id="no-monitor-collab-msg" class="no-tasks-msg">
+				Nessun collaboratore selezionato.
+			</div>
+		</div>
+
+	</div>
+
+	<script src="./script/serverCommunication.js"></script>
+    <script src="./script/banner.js"></script>
+    <script src="./script/userInfo.js"></script>
+	<script src="./script/manager.js"></script>
+    <script src="./script/logout.js"></script>
+</body>
+</html>
