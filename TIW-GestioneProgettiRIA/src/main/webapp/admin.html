@@ -21,23 +21,17 @@
 
 	<div class="main-container">
 		
-		<!-- ===================================== -->
-		<!-- SEZIONE 1: CREAZIONE NUOVO PROGETTO   -->
-		<!-- ===================================== -->
 		<div id="section-creation" class="creation-section">
 			<h3>Creazione Nuovo Progetto</h3>
 		<p class="page-subtitle">Compila i moduli sottostanti per inserire un nuovo progetto, definire i relativi WP e pianificare i task.</p>
 	
-		<!-- Banner per Feedback (Successo / Errore) gestito da JS -->
 		<div id="feedback-banner" style="display: none; margin-bottom: 20px; padding: 12px; border-radius: 4px;">
 			<p id="feedback-text"></p>
 		</div>
 
-		<!-- STRUTTURA UNICA DI CREAZIONE -->
 		<form id="bulk-project-form" class="form-vertical" autocomplete="off">
 			<div class="dashboard-forms-grid" style="display: flex; gap: 24px; flex-wrap: wrap; align-items: start;">
 				
-				<!-- COLONNA SINISTRA: DATI GENERALI PROGETTO -->
 				<div class="form-card-section" style="flex: 1; min-width: 320px; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
 					<h3>Dati Progetto</h3>
 					<hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
@@ -64,21 +58,18 @@
 					</div>
 				</div>
 
-				<!-- COLONNA DESTRA: WORK PACKAGES & TASK DINAMICI -->
 				<div class="form-card-section" style="flex: 2; min-width: 450px; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
 					<div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-        <h3>Work Packages (WP) e Task</h3>
-        <div style="display: flex; gap: 8px;">
-            <button type="button" class="btn-secondary" id="btn-undo" title="Annulla (Ctrl+Z)" style="padding: 5px 10px;">↶ Annulla</button>
-            <button type="button" class="btn-secondary" id="btn-redo" title="Ripristina (Ctrl+Y)" style="padding: 5px 10px;">↷ Ripristina</button>
-            <button type="button" class="btn-secondary" id="btn-add-wp" style="font-weight: bold;">+ Aggiungi WP</button>
-        </div>
-    </div>
+						<h3>Work Packages (WP) e Task</h3>
+						<div style="display: flex; gap: 8px;">
+							<button type="button" class="btn-secondary" id="btn-undo" title="Annulla (Ctrl+Z)" style="padding: 5px 10px;">↶ Annulla</button>
+							<button type="button" class="btn-secondary" id="btn-redo" title="Ripristina (Ctrl+Y)" style="padding: 5px 10px;">↷ Ripristina</button>
+							<button type="button" class="btn-secondary" id="btn-add-wp" style="font-weight: bold;">+ Aggiungi WP</button>
+						</div>
+					</div>
 					<hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
 					
-					<!-- Container dinamico dei WP -->
 					<div id="wp-container">
-						<!-- I WP verranno inseriti qui da JS -->
 					</div>
 				</div>
 
@@ -86,9 +77,6 @@
 		</form>
 		</div>
 
-		<!-- ========================================== -->
-		<!-- SEZIONE 2: MONITORAGGIO STATO PROGETTI     -->
-		<!-- ========================================== -->
 		<div id="section-monitor" class="monitor-section hidden-section" style="padding-bottom: 30px;">
 			<h3>Monitoraggio Stato Progetti</h3>
 			<p class="page-subtitle">Seleziona un progetto dal menu a tendina per visualizzarne l'intera struttura, i relativi Work Package e la ripartizione dei singoli task pianificati.</p>

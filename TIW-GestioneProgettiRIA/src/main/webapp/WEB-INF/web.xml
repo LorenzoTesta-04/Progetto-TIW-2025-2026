@@ -50,6 +50,15 @@
 		<servlet-name>DoSaveHours</servlet-name>
 		<url-pattern>/DoSaveHours</url-pattern>
 	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>DoStartProject</servlet-name>
+		<servlet-class>it.polimi.tiw.progetto2025.controllers.actionPerformer.DoStartProject</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>DoStartProject</servlet-name>
+		<url-pattern>/DoStartProject</url-pattern>
+	</servlet-mapping>
 	
 	<servlet>
 		<servlet-name>DoTaskAllocation</servlet-name>

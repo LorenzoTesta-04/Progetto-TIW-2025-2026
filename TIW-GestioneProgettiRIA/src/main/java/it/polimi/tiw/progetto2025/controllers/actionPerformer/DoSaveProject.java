@@ -14,13 +14,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import it.polimi.tiw.progetto2025.beans.Project;
 import it.polimi.tiw.progetto2025.beans.Task;
 import it.polimi.tiw.progetto2025.beans.User;
 import it.polimi.tiw.progetto2025.beans.WorkPackage;
@@ -45,7 +43,7 @@ public class DoSaveProject extends HttpServlet
 		} 
 		catch(SQLException e) 
 		{
-			throw new ServletException("Impossibile connettersi al DB nella Servlet DoLogin", e);
+			throw new ServletException("Impossibile connettersi al DB nella Servlet DoSaveProject", e);
 		}
 	}
 	
@@ -53,26 +51,142 @@ public class DoSaveProject extends HttpServlet
 	public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
 	{
 		HttpSession session=request.getSession(false);
-		
+
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
-		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); 
+		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+
+		if(!checkAccess.checkManager(session, response, getServletContext()))
+		{
+			response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+			return;
+		}
+
+		User user=(User) session.getAttribute("user");
 		
 		JsonElement root=JsonParser.parseReader(request.getReader());
 		JsonObject json=root.getAsJsonObject();
 		
-		if(!checkAccess.checkAdmin(session, response, getServletContext())) return;
-		
-		User user=(User)request.getSession().getAttribute("user");
-
 		try 
 		{
-			connection.setAutoCommit(false);
+			//Validazione
+			if(!json.has("nomeProgetto") || !json.has("durata") || !json.has("idResponsabile") || !json.has("workPackages")) 
+			{
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().write("{\"error\": \"Struttura dati JSON non conforme o parametri obbligatori omessi.\"}");
+				return;
+			}
 
-			//Estrazione dati dal JSON
-			String nomeProgetto=json.get("nomeProgetto").getAsString();
+			String nomeProgetto=json.get("nomeProgetto").getAsString().trim();
 			int durata=json.get("durata").getAsInt();
 			int idResponsabile=json.get("idResponsabile").getAsInt();
+			JsonArray wpArray=json.getAsJsonArray("workPackages");
+
+			if(nomeProgetto.isEmpty()) 
+			{
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().write("{\"error\": \"Il nome del progetto non può essere vuoto.\"}");
+				return;
+			}
+
+			if(durata<=0) 
+			{
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().write("{\"error\": \"La durata del progetto deve essere maggiore di zero.\"}");
+				return;
+			}
+
+			if(wpArray==null || wpArray.size()==0) 
+			{
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().write("{\"error\": \"Attenzione: definire almeno un Work Package prima di salvare.\"}");
+				return;
+			}
+
+			for(JsonElement wpElem:wpArray) 
+			{
+				if(!wpElem.isJsonObject()) 
+				{
+					response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+					response.getWriter().write("{\"error\": \"Formato del Work Package non valido.\"}");
+					return;
+				}
+
+				JsonObject wpObj=wpElem.getAsJsonObject();
+				if(!wpObj.has("nomeWP") || !wpObj.has("meseInizio") || !wpObj.has("meseFine") || !wpObj.has("tasks")) 
+				{
+					response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+					response.getWriter().write("{\"error\": \"Attributi del Work Package incompleti.\"}");
+					return;
+				}
+
+				String nomeWP=wpObj.get("nomeWP").getAsString().trim();
+				int wpInizio=wpObj.get("meseInizio").getAsInt();
+				int wpFine=wpObj.get("meseFine").getAsInt();
+				JsonArray taskArray=wpObj.getAsJsonArray("tasks");
+
+				if(nomeWP.isEmpty()) 
+				{
+					response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+					response.getWriter().write("{\"error\": \"Il titolo dei Work Package non può essere vuoto.\"}");
+					return;
+				}
+
+				// Coerenza interna e di progetto del WP
+				if(wpInizio<1 || wpInizio>wpFine || wpFine>durata) 
+				{
+					response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+					response.getWriter().write("{\"error\": \"Coerenza temporale del '"+nomeWP+"'non valida.\"}");
+					return;
+				}
+
+				if(taskArray==null || taskArray.size()==0) 
+				{
+					response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+					response.getWriter().write("{\"error\": \"Errore: il WP '"+nomeWP+"' non contiene alcun Task.\"}");
+					return;
+				}
+
+				//Coerenza temporale dei singoli Task rispetto al WP genitore
+				for(JsonElement tElem:taskArray) 
+				{
+					if(!tElem.isJsonObject()) 
+					{
+						response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+						response.getWriter().write("{\"error\": \"Formato del Task non valido nel WP '"+nomeWP+"'.\"}");
+						return;
+					}
+
+					JsonObject tObj=tElem.getAsJsonObject();
+					if(!tObj.has("nomeTask") || !tObj.has("meseInizio") || !tObj.has("meseFine") || !tObj.has("descrizione")) 
+					{
+						response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+						response.getWriter().write("{\"error\": \"Attributi del Task incompleti nel WP '"+nomeWP+"'.\"}");
+						return;
+					}
+
+					String nomeTask=tObj.get("nomeTask").getAsString().trim();
+					int tInizio=tObj.get("meseInizio").getAsInt();
+					int tFine=tObj.get("meseFine").getAsInt();
+
+					if(nomeTask.isEmpty()) 
+					{
+						response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+						response.getWriter().write("{\"error\": \"Il titolo del Task nel WP '"+nomeWP+"' non può essere vuoto.\"}");
+						return;
+					}
+
+					if(tInizio>tFine || tInizio<wpInizio || tFine>wpFine) 
+					{
+						response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+						response.getWriter().write("{\"error\": \"Errore di coerenza temporale nel Task '"+nomeTask+"'.\"}");
+						return;
+					}
+
+				}
+			}
+
+			connection.setAutoCommit(false);
 
 			ProjectDAO pDAO=new ProjectDAO(connection);
 			pDAO.createProject(nomeProgetto, durata, idResponsabile, user.getID());
@@ -82,10 +196,8 @@ public class DoSaveProject extends HttpServlet
 					.orElseThrow(() -> new SQLException("Errore nel recupero del progetto appena creato"))
 					.getId();
 
-			//Salvataggio WP
-			JsonArray wpArray=json.getAsJsonArray("workPackages");
+			// Salvataggio WP
 			WorkPackageDAO wpDAO=new WorkPackageDAO(connection);
-
 			for(JsonElement wpElem:wpArray) 
 			{
 				JsonObject wpObj=wpElem.getAsJsonObject();
@@ -105,7 +217,6 @@ public class DoSaveProject extends HttpServlet
 			{
 				JsonObject wpObj=wpElem.getAsJsonObject();
 				String nomeWP=wpObj.get("nomeWP").getAsString();
-				
 				int idWpCorrente=wpMap.get(nomeWP); 
 				
 				JsonArray taskArray=wpObj.getAsJsonArray("tasks");
@@ -125,21 +236,19 @@ public class DoSaveProject extends HttpServlet
 			connection.commit();
 
 			//Risposta
-			Project p=pDAO.findProjectById(idProgetto);
-			List<WorkPackage> WPs=wpDAO.findWPsByProject(idProgetto);
-
 			JsonObject pJson=new JsonObject();
-			pJson.addProperty("id", p.getId());
-			pJson.addProperty("nomeProgetto", p.getNomeProgetto());
-			pJson.addProperty("stato", p.getStato().toString());
+			pJson.addProperty("id", idProgetto);
+			pJson.addProperty("durata", durata);
+			pJson.addProperty("nomeProgetto", nomeProgetto);
+			pJson.addProperty("stato", "CREATO");
 
 			int projTotalHours=0;
 			int projWorkedHours=0;
 
 			JsonArray jsonWpsArray=new JsonArray();
-			if(WPs!=null) 
+			if(wps != null) 
 			{
-				for(WorkPackage wp:WPs) 
+				for(WorkPackage wp:wps) 
 				{
 					JsonObject wpJson=new JsonObject();
 					wpJson.addProperty("codiceWP", wp.getCodiceWP());
@@ -180,20 +289,19 @@ public class DoSaveProject extends HttpServlet
 			pJson.addProperty("totalProjectHours", projTotalHours);
 			pJson.addProperty("totalWorkedHours", projWorkedHours);
 
-			response.setContentType("application/json");
 			response.getWriter().write(pJson.toString());
 		} 
 		catch(Exception e) 
 		{
-			try {connection.rollback();} 
+			try { connection.rollback(); } 
 			catch(SQLException ignore) {}
 			
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			response.getWriter().write("Errore: " + e.getMessage());
+			response.getWriter().write("{\"error\": \"Errore interno del server durante il salvataggio: "+e.getMessage()+"\"}");
 		} 
 		finally
 		{
-			try {connection.setAutoCommit(true);}
+			try { connection.setAutoCommit(true); }
 			catch(SQLException ignore) {}
 		}
 	}
@@ -202,7 +310,7 @@ public class DoSaveProject extends HttpServlet
 	public void destroy()
 	{
 		if(connection!=null)
-			try {connection.close();}
+			try { connection.close(); }
 			catch(SQLException ignored) {}
 	}
 }

@@ -4,15 +4,12 @@ document.addEventListener('DOMContentLoaded', () => {
 	loadUserProfile();	
     loadInitialData();
 
-    // Riferimenti ai blocchi di sezione
     const sectionCreation=document.getElementById('section-creation');
     const sectionMonitor=document.getElementById('section-monitor');
 
-    // Riferimenti ai pulsanti dell'Header
     const btnToggleVerify=document.getElementById('btn-toggle-verify');
     const btnToggleCreate=document.getElementById('btn-toggle-create');
 	
-	// Pulsanti Undo / Redo
     const btnUndo=document.getElementById('btn-undo');
     const btnRedo=document.getElementById('btn-redo');
     if(btnUndo) btnUndo.addEventListener('click', performUndo);
@@ -20,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     updateUndoRedoButtons();
 
-    // Scorciatoie da tastiera Ctrl+Z / Ctrl+Y
+	//UNDO/REDO listener
     document.addEventListener('keydown', (e) => {
         if(e.ctrlKey || e.metaKey)
             if(e.key==='z' || e.key==='Z') 
@@ -35,23 +32,15 @@ document.addEventListener('DOMContentLoaded', () => {
             }
     });
 
-	// ==========================================
-    // AGGANCIO TRIGGER DI UNDO/REDO SUI CAMPI (ORIGINALE)
-    // ==========================================
+	//UNDO/REDO listener
     const form=document.getElementById('bulk-project-form');
     if(form) 
 	{
-		let debounceTimer;
-
-        form.addEventListener('focusout', (e) => {
-            if(e.target.tagName==='INPUT' || e.target.tagName==='TEXTAREA' || e.target.tagName==='SELECT') 
-			{
-				clearTimeout(debounceTimer);
+        form.addEventListener('focusin', (e) => {
+            if(e.target.tagName==='INPUT' || e.target.tagName==='TEXTAREA' || e.target.tagName==='SELECT')
                 saveState();
-            }
         });
 
-        // 2. Se l'utente digita, invalida semplicemente la cronologia Redo (senza salvare nuovi stati Undo)
 		form.addEventListener('input', (e) => {
             if(e.target.tagName==='INPUT' || e.target.tagName==='TEXTAREA' || e.target.tagName==='SELECT') 
 			{
@@ -60,67 +49,44 @@ document.addEventListener('DOMContentLoaded', () => {
                     redoStack.length=0;
                     updateUndoRedoButtons();
                 }
-
-                clearTimeout(debounceTimer);
-                
-                debounceTimer = setTimeout(() => {
-                    saveState();
-                }, 1000); 
             }
         });
     }
-	
-    // Commuta alla visualizzazione di "Verifica Progetti"
-    function showVerificationView() 
-	{
+
+    btnToggleVerify.addEventListener('click', function showVerificationView() {
         sectionCreation.classList.add('hidden-section');
         sectionMonitor.classList.remove('hidden-section');
         btnToggleVerify.classList.add('hidden-section');
         btnToggleCreate.classList.remove('hidden-section');
-    }
-
-    // Commuta alla visualizzazione di "Creazione Progetto"
-    function showCreationView() 
-	{
+	});
+	
+    btnToggleCreate.addEventListener('click', function showCreationView() {
         sectionMonitor.classList.add('hidden-section');
         sectionCreation.classList.remove('hidden-section');
         btnToggleCreate.classList.add('hidden-section');
         btnToggleVerify.classList.remove('hidden-section');
+    });
+
+	const selectProgetto=document.getElementById('idProgetto');
+    if(selectProgetto) 
+	{
+        selectProgetto.addEventListener('change', (e) => {
+            const idProgettoSelezionato=parseInt(e.target.value);
+            
+            // Cerca la struttura del progetto nell'array globale pre-caricato
+            const project=loadedProjects.find(p => p.id===idProgettoSelezionato);
+            if(project) renderProjectDetails(project);
+            else console.error("Progetto non trovato localmente.");
+        });
     }
 
-    // Associa eventi ai pulsanti dell'header
-    btnToggleVerify.addEventListener('click', showVerificationView);
-    btnToggleCreate.addEventListener('click', showCreationView);
-
-    // Gestore del form di visualizzazione progetto
-	const selectProgetto=document.getElementById('idProgetto');
-	    if(selectProgetto) 
-		{
-	        selectProgetto.addEventListener('change', (e) => {
-	            const idProgettoSelezionato=parseInt(e.target.value);
-	            
-	            // Cerca la struttura del progetto nell'array globale pre-caricato
-	            const project=loadedProjects.find(p => p.id===idProgettoSelezionato);
-	            if(project) renderProjectDetails(project);
-	            else console.error("Progetto non trovato localmente.");
-	        });
-	    }
-
-    // Gestore del form di creazione Progetto Bulk
     const bulkForm=document.getElementById('bulk-project-form');
-    if(bulkForm) bulkForm.addEventListener('submit', saveProjectBulk);
+    if(bulkForm) 
+		bulkForm.addEventListener('submit', saveProjectBulk);
 
-    // Listener per aggiungere WP dinamici
     document.getElementById('btn-add-wp').addEventListener('click', () => addWorkPackage());
 });
 
-// ===========================
-// CARICAMENTO DATI DAL SERVER
-// ===========================
-
-/**
- * Carica l'utente e l'elenco iniziale dei progetti per popolare la select
- */
 function loadInitialData() 
 {
     sendAsyncRequest('GET', 'Admin', null, function(xhr) {
@@ -130,16 +96,11 @@ function loadInitialData()
 			{
                 const data=JSON.parse(xhr.responseText);					
                 
-                // 1. Salviamo l'intero albero gerarchico dei progetti
                 loadedProjects=data.myProjects || [];
 
-                // 2. Popola il menu a tendina dei progetti
                 populateProjectsDropdown(loadedProjects);
-
-                // 3. Popola i tecnici responsabili
                 populateTechniciansSelect(data.technicians);
 
-                // 4. Gestione del progetto di default
                 if(data.defaultProjectId) 
 				{
                     const selectProj=document.getElementById('idProgetto');
@@ -153,16 +114,13 @@ function loadInitialData()
             } 
 			else
 			{
+				localStorage.clear();
 				window.location.href="login.html";
-                console.error("Impossibile caricare i dati dall'endpoint Admin.");
 			}
         }
     });
 }
 
-/**
- * Popola la select dei responsabili tecnici con i dati forniti dal JSON di Admin
- */
 function populateTechniciansSelect(technicians) 
 {
     const select=document.getElementById('idResponsabile');
@@ -173,17 +131,15 @@ function populateTechniciansSelect(technicians)
 		{
             technicians.forEach(t => {
                 const opt=document.createElement('option');
-                opt.value=t.id; // Nel JSON è t.id
-                opt.textContent=t.nomeCompleto; // Nel JSON è t.nomeCompleto
+                opt.value=t.id;
+                opt.textContent=t.nomeCompleto;
                 select.appendChild(opt);
             });
         }
     }
 }
 
-// =================
-// VERIFICA PROGETTI
-// =================
+//VERIFICA PROGETTI
 function populateProjectsDropdown(projects) 
 {
     const select=document.getElementById('idProgetto');
@@ -217,16 +173,12 @@ function renderProjectDetails(project)
     container.classList.remove('hidden-section');
     msgEmpty.classList.add('hidden-section');
 
-    // Allinea il valore corrente della select
     document.getElementById('idProgetto').value=project.id;
-
-    // Aggiorna intestazione del Progetto con i dati del nuovo JSON
     document.getElementById('view-project-name').innerText=project.nomeProgetto;
     document.getElementById('view-project-state').innerText=project.stato;
     document.getElementById('view-project-hours-planned').innerText=`${project.totalProjectHours} ore`;
     document.getElementById('view-project-hours-worked').innerText=`${project.totalWorkedHours} ore`;
 
-    // Svuota e popola la lista dei WP
     const wpListContainer=document.getElementById('view-wp-list');
     wpListContainer.innerHTML='';
 
@@ -239,7 +191,8 @@ function renderProjectDetails(project)
     project.wps.forEach((wp, wpIdx) => {
         let tasksHtml='';
 
-        if(!wp.tasks || wp.tasks.length===0) tasksHtml=`<div class="no-tasks-msg">Nessun task presente in questo Work Package.</div>`;
+        if(!wp.tasks || wp.tasks.length===0) 
+			tasksHtml=`<div class="no-tasks-msg">Nessun task presente in questo Work Package.</div>`;
         else 
 		{
             wp.tasks.forEach((t, tIdx) => {
@@ -283,13 +236,17 @@ function updateIndexes()
     wpCards.forEach((wpCard, wpIdx) => {
         const wpNumber=wpIdx+1;
         const wpTitleHeader=wpCard.querySelector('.wp-header-title');
-        if(wpTitleHeader) wpTitleHeader.innerText=`Work Package #${wpNumber}`;
+		
+        if(wpTitleHeader) 
+			wpTitleHeader.innerText=`Work Package #${wpNumber}`;
 
         const taskCards=wpCard.querySelectorAll('.task-card');
         taskCards.forEach((taskCard, taskIdx) => {
             const taskNumber=taskIdx+1;
             const taskTitleHeader=taskCard.querySelector('.task-header-title');
-            if(taskTitleHeader) taskTitleHeader.innerText=`Task #${taskNumber}`;
+			
+            if(taskTitleHeader) 
+				taskTitleHeader.innerText=`Task #${taskNumber}`;
         });
     });
 }
@@ -336,7 +293,6 @@ function addWorkPackage()
     
     wpContainer.insertAdjacentHTML('beforeend', wpHtml);
     updateIndexes();
-    saveState(); // Cattura lo stato "appena creato" (campi vuoti), separato dalle modifiche successive
 }
 
 function addTaskToWp(wpContainerId) 
@@ -376,18 +332,18 @@ function addTaskToWp(wpContainerId)
     
     tasksContainer.insertAdjacentHTML('beforeend', taskHtml);
     updateIndexes();
-    saveState(); // Cattura lo stato "appena creato" (campi vuoti), separato dalle modifiche successive
 }
 
+//DRAG&DROP
 let activePlaceholder=null;
 
 function dragTask(event) 
 {
+    saveState();
     event.dataTransfer.setData("text/plain", event.target.id);
     event.target.classList.add('dragging');
 }
 
-// Chiamato quando il trascinamento è terminato
 document.addEventListener('dragend', (event) => {
     if(event.target.classList.contains('task-card'))
         event.target.classList.remove('dragging');
@@ -404,23 +360,21 @@ function allowDrop(event)
     event.preventDefault();
     
     const container=event.target.closest('.tasks-container');
-    if(!container) return;
+    if(!container) 
+		return;
 
-    // Rimuove il vecchio placeholder se presente in un altro container
     if(activePlaceholder && activePlaceholder.parentNode!==container) 
 	{
         activePlaceholder.remove();
         activePlaceholder=null;
     }
 
-    // Crea il placeholder se non esiste ancora
     if(!activePlaceholder) 
 	{
         activePlaceholder=document.createElement('div');
         activePlaceholder.className='drag-placeholder';
     }
 
-    // Trova l'elemento (task) subito sotto la posizione corrente del mouse
     const afterElement=getDragAfterElement(container, event.clientY);
     
     if(afterElement==null) container.appendChild(activePlaceholder);
@@ -437,7 +391,6 @@ function dropTask(event)
     
     if(container && draggedTask) 
 	{
-		saveState();
         if(activePlaceholder && container.contains(activePlaceholder)) 
 		{
             container.insertBefore(draggedTask, activePlaceholder);
@@ -448,6 +401,7 @@ function dropTask(event)
             container.appendChild(draggedTask);
 
         updateIndexes();
+		hasDropped=true;
     }
 }
 
@@ -480,10 +434,7 @@ function removeElement(elementId)
     }
 }
 
-// ==========================================
-// 6. INVIO E VALIDAZIONE CREAZIONE BULK
-// ==========================================
-
+//SALVATAGGIO PROGETTO
 function saveProjectBulk(event) 
 {
     event.preventDefault(); 
@@ -505,9 +456,10 @@ function saveProjectBulk(event)
 
     let validationFailed=false;
 
-    // 1. Iterazione sui WP per estrazione e controllo esistenza task
+	//Costruzione json per invio al server
     wpCards.forEach(wpCard => {
-        if(validationFailed) return;
+        if(validationFailed) 
+			return;
 
         const allInputs=wpCard.querySelectorAll('.form-input');
         const wpInputs=Array.from(allInputs).filter(input => !input.closest('.task-card'));
@@ -521,14 +473,13 @@ function saveProjectBulk(event)
 
         const taskCards=wpCard.querySelectorAll('.task-card');
         
-        // Controllo esistenza task
         if(taskCards.length===0) 
 		{
             showFeedback(`Errore: il WP "${wpData.nomeWP || 'senza nome'}" non contiene alcun Task.`, false);
             validationFailed=true;
             return;
         }
-
+		
         taskCards.forEach(taskCard => {
             const taskInputs=taskCard.querySelectorAll('.form-input');
             wpData.tasks.push({
@@ -542,44 +493,46 @@ function saveProjectBulk(event)
         payload.workPackages.push(wpData);
     });
 
-    if(validationFailed) return;
+    if(validationFailed) 
+		return;
 
-	// 2. Validazioni logiche e temporali (Coerenza intervalli)
-	    for(let wp of payload.workPackages) 
+	//Validazione campi
+    for(let wp of payload.workPackages) 
+	{
+        // Coerenza interna WP
+        if(wp.meseInizio>wp.meseFine) 
 		{
-	        // Coerenza interna WP
-	        if(wp.meseInizio>wp.meseFine) 
-			{
-	            showFeedback(`Errore WP "${wp.nomeWP}": Inizio (${wp.meseInizio}) dopo Fine (${wp.meseFine}).`, false);
-	            return;
-	        }
-	        // Coerenza WP rispetto al Progetto
-	        if(wp.meseFine>payload.durata) 
-			{
-	            showFeedback(`Errore WP "${wp.nomeWP}": Fine (${wp.meseFine}) oltre la durata progetto (${payload.durata}).`, false);
-	            return;
-	        }
+            showFeedback(`Errore WP "${wp.nomeWP}": Inizio (${wp.meseInizio}) dopo Fine (${wp.meseFine}).`, false);
+            return;
+        }
+        // Coerenza WP rispetto al Progetto
+        if(wp.meseFine>payload.durata) 
+		{
+            showFeedback(`Errore WP "${wp.nomeWP}": Fine (${wp.meseFine}) oltre la durata progetto (${payload.durata}).`, false);
+            return;
+        }
 
-	        // Coerenza Task
-	        for(let t of wp.tasks) 
+        // Coerenza Task
+        for(let t of wp.tasks) 
+		{
+            // Coerenza interna Task
+            if(t.meseInizio>t.meseFine) 
 			{
-	            // Coerenza interna Task
-	            if(t.meseInizio>t.meseFine) 
-				{
-	                showFeedback(`Errore Task "${t.nomeTask}": Inizio (${t.meseInizio}) dopo Fine (${t.meseFine}).`, false);
-	                return;
-	            }
-	            // Coerenza Task rispetto al WP
-	            if(t.meseInizio<wp.meseInizio || t.meseFine>wp.meseFine) 
-				{
-	                showFeedback(`Errore Task "${t.nomeTask}": Fuori intervallo WP (${wp.meseInizio}-${wp.meseFine}).`, false);
-	                return;
-	            }
-	        }
-	    }
+                showFeedback(`Errore Task "${t.nomeTask}": Inizio (${t.meseInizio}) dopo Fine (${t.meseFine}).`, false);
+                return;
+            }
+            // Coerenza Task rispetto al WP
+            if(t.meseInizio<wp.meseInizio || t.meseFine>wp.meseFine) 
+			{
+                showFeedback(`Errore Task "${t.nomeTask}": Fuori intervallo WP (${wp.meseInizio}-${wp.meseFine}).`, false);
+                return;
+            }
+        }
+    }
 	
+	//Invio, in caso di successo il server restituisce il json del progetto
     sendAsyncRequest('POST', 'DoSaveProject', payload, function(xhr) {
-		if(xhr.readyState===4 && xhr.status===200) 
+		if(xhr.readyState===4 && xhr.status===200)
 		{
 		    showFeedback("Successo! Progetto salvato correttamente.");
 		        
@@ -601,14 +554,12 @@ function saveProjectBulk(event)
 	        addWorkPackage();
 	        
 	    } 
-		else if(xhr.readyState===4) showFeedback("Errore durante il salvataggio: "+xhr.responseText, false);
+		else if(xhr.readyState===4) 
+			showFeedback("Errore durante il salvataggio: "+xhr.responseText, false);
     });
 }
 
-// ==========================================
-// SISTEMA DI UNDO / REDO GLOBALE (FORM COMPLETO)
-// ==========================================
-
+//UNDO/REDO
 const undoStack=[];
 const redoStack=[];
 const MAX_STATES=30;
@@ -617,7 +568,7 @@ function saveState()
 {
     const container=document.getElementById('wp-container');
     const form=document.getElementById('bulk-project-form');
-    if (!container || !form) return;
+    if(!container || !form) return;
 
     const projectData={
         nomeProgetto: document.getElementById('nomeProgetto').value,
@@ -639,7 +590,6 @@ function saveState()
         wpInputs: inputValues
     };
 
-    //Verifica duplicati
     if(undoStack.length>0) 
 	{
         const lastSnapshot=undoStack[undoStack.length-1];
@@ -659,9 +609,6 @@ function saveState()
     updateUndoRedoButtons();
 }
 
-/**
- * Ripristina uno snapshot specifico del form
- */
 function restoreState(snapshot) 
 {
     const container=document.getElementById('wp-container');
@@ -676,7 +623,8 @@ function restoreState(snapshot)
 
     const inputs=container.querySelectorAll('input, textarea');
     snapshot.wpInputs.forEach(item => {
-        if(inputs[item.index]) inputs[item.index].value=item.value;
+        if(inputs[item.index]) 
+			inputs[item.index].value=item.value;
     });
 
     updateIndexes();
@@ -685,7 +633,7 @@ function restoreState(snapshot)
 
 function performUndo() 
 {
-    if (undoStack.length===0) return;
+    if(undoStack.length===0) return;
 
     const container=document.getElementById('wp-container');
     
@@ -711,11 +659,10 @@ function performUndo()
 
 function performRedo() 
 {
-    if (redoStack.length===0) return;
+    if(redoStack.length===0) return;
 
     const container=document.getElementById('wp-container');
 
-    // Salviamo lo stato CORRENTE in Undo prima di ripristinare il futuro
     const projectData={
         nomeProgetto: document.getElementById('nomeProgetto').value,
         durata: document.getElementById('durata').value,
@@ -741,12 +688,14 @@ function updateUndoRedoButtons()
     const btnUndo=document.getElementById('btn-undo');
     const btnRedo=document.getElementById('btn-redo');
     
-    if (btnUndo) {
+    if(btnUndo) 
+	{
         btnUndo.disabled=undoStack.length===0;
         btnUndo.style.opacity=undoStack.length===0?"0.5":"1";
         btnUndo.style.cursor=undoStack.length===0?"not-allowed":"pointer";
     }
-    if (btnRedo) {
+    if(btnRedo) 
+	{
         btnRedo.disabled=redoStack.length===0;
         btnRedo.style.opacity=redoStack.length===0?"0.5":"1";
         btnRedo.style.cursor=redoStack.length===0?"not-allowed":"pointer";

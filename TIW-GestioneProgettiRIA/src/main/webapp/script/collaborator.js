@@ -7,9 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setupMatrixCellListener();
 });
 
-// ===========================
-// CARICAMENTO DATI DAL SERVER
-// ===========================
 function loadInitialData() 
 {
     sendAsyncRequest('GET', 'Collaborator', null, (xhr) => {
@@ -34,8 +31,8 @@ function loadInitialData()
 	        } 
 			else
 			{
+				localStorage.clear();
 				window.location.href="login.html";
-	            console.error("Impossibile caricare i dati dall'endpoint Admin.");
 			}
 		}
     });
@@ -44,12 +41,13 @@ function loadInitialData()
 function populateProjectsDropdown(projects) 
 {
     const select=document.getElementById('idProgettoCollaboratore');
-    if(!select) return;
+    if(!select) 
+		return;
 
     select.innerHTML='<option value="" disabled selected>-- Scegli un Progetto --</option>';
-    if(!projects) return;
+    if(!projects) 
+		return;
 
-    // Ottimizzazione: DocumentFragment per ridurre le manipolazioni del DOM
     const fragment=document.createDocumentFragment();
     projects.forEach(p => {
         const opt=document.createElement('option');
@@ -61,7 +59,8 @@ function populateProjectsDropdown(projects)
     select.appendChild(fragment);
 }
 
-function setupProjectSelectorListener() {
+function setupProjectSelectorListener() 
+{
     const select=document.getElementById('idProgettoCollaboratore');
     if(select) 
 	{
@@ -73,10 +72,9 @@ function setupProjectSelectorListener() {
     }
 }
 
-// =================
-// RENDERING TABELLA
-// =================
-function renderCollaboratorMatrix(projectId) {
+//Tabella
+function renderCollaboratorMatrix(projectId) 
+{
     const project=loadedProjects.find(p => p.id===projectId);
     const section=document.getElementById('collaborator-matrix-section');
     const msgEmpty=document.getElementById('no-project-selected-msg');
@@ -92,7 +90,6 @@ function renderCollaboratorMatrix(projectId) {
 
     table.textContent='';
 
-    // Costruiamo e appendiamo intestazione e corpo in modo ottimizzato
     table.appendChild(createTableHeader(project.durata));
     table.appendChild(createTableBody(project.wps, project.durata));
 }
@@ -103,9 +100,6 @@ function toggleMatrixVisibility(hasProject, section, msgEmpty)
     if(section) section.classList.toggle('hidden-section', !hasProject);
 }
 
-/**
- * Crea l'elemento <thead> in modo sicuro e veloce
- */
 function createTableHeader(duration) 
 {
     const thead=document.createElement('thead');
@@ -121,9 +115,6 @@ function createTableHeader(duration)
     return thead;
 }
 
-/**
- * Crea il corpo <tbody> usando DocumentFragment per massimizzare le performance
- */
 function createTableBody(wps, duration) 
 {
     const tbody=document.createElement('tbody');
@@ -140,7 +131,6 @@ function createTableBody(wps, duration)
             const tr=document.createElement('tr');
             let rowHtml='';
 
-            // Rowspan per il nome del WP (solo sulla prima riga del gruppo)
             if(tIdx===0)
                 rowHtml+=`<td rowspan="${totalTasks}" class="td-wp-name" style="font-weight: bold; background: #fafafa; vertical-align: middle;">${wp.numeroOrdine}. ${wp.titolo}</td>`;
             
@@ -182,21 +172,19 @@ function createMonthlyCellsHtml(task, duration)
     return cellsHtml;
 }
 
-
-// ========================
-// EVENTO DI INLINE-EDITING
-// ========================
+//Modifica ore inline
 function setupMatrixCellListener() 
 {
     const table=document.getElementById('collaborator-hours-table');
-    if(!table) return;
+    if(!table) 
+		return;
 
-    // Un unico ascoltatore sulla tabella
     table.addEventListener('click', (e) => {
         const cell=e.target.closest('.editable-cell');
-        
+       
 		//Se cella non editabile
-        if(!cell || cell.querySelector('input')) return;
+        if(!cell || cell.querySelector('input')) 
+			return;
 
         const currentVal=cell.getAttribute('data-current-value');
         const input=document.createElement('input');
@@ -214,7 +202,8 @@ function setupMatrixCellListener()
         let hasSaved=false;
 
         const triggerAutoSave=() => {
-            if(hasSaved) return;
+            if(hasSaved) 
+				return;
             hasSaved=true;
 
             const newValueStr=input.value.trim();
@@ -251,6 +240,7 @@ function setupMatrixCellListener()
     });
 }
 
+//Invio, in caso di successo aggiorno il modello locale
 function executeAutoSaveHours(taskId, month, hours, cellElement, fallbackValue) 
 {
     const payload={
@@ -268,7 +258,6 @@ function executeAutoSaveHours(taskId, month, hours, cellElement, fallbackValue)
                 cellElement.setAttribute('data-current-value', hours);
                 cellElement.textContent=hours;
                 
-                // Aggiornamento ottimizzato della memoria locale (cicli interrotti subito col 'break')
                 const currentProjId=parseInt(document.getElementById('idProgettoCollaboratore').value, 10);
                 const project=loadedProjects.find(p => p.id===currentProjId);
                 

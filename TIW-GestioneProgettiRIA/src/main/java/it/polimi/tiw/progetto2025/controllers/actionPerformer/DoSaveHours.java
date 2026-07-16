@@ -16,6 +16,7 @@ import com.google.gson.JsonParser;
 import it.polimi.tiw.progetto2025.beans.User;
 import it.polimi.tiw.progetto2025.daos.MyDAO;
 import it.polimi.tiw.progetto2025.daos.TaskDAO;
+import it.polimi.tiw.progetto2025.utils.checkAccess;
 
 public class DoSaveHours extends HttpServlet 
 {
@@ -37,22 +38,21 @@ public class DoSaveHours extends HttpServlet
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
     {
-        HttpSession session=request.getSession(false);
-        
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-    
-        if(session==null || session.getAttribute("user")==null) 
-        {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("{\"error\": \"Sessione scaduta o non valida.\"}");
-            return;
-        }
-        
-        User user=(User) session.getAttribute("user");
+    	HttpSession session=request.getSession(false);
+
+		response.setContentType("application/json");
+		response.setCharacterEncoding("UTF-8");
+		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+
+		if(!checkAccess.checkCollaborator(session, response, getServletContext()))
+		{
+			response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+			return;
+		}
+
+		User user=(User) session.getAttribute("user");
         TaskDAO taskDAO=new TaskDAO(connection);
         
         // Parsing asincrono del payload JSON tramite JsonParser

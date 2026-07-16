@@ -1,6 +1,3 @@
-// ==========================================
-// MANAGER SPA CORE ENGINE-STATE & DOM
-// ==========================================
 var loadedData={
     managedProjects: [],
     collaborators: [],
@@ -15,14 +12,8 @@ document.addEventListener('DOMContentLoaded', function() {
     setupMonitorListeners();
 });
 
-// ==========================================
-// 1. CARICAMENTO DATI E GESTIONE DI STATO
-// ==========================================
-function loadInitialData(selectedProjectId, selectedWpCode) 
+function loadInitialData() 
 {
-    if(selectedProjectId===undefined) selectedProjectId=null;
-    if(selectedWpCode===undefined) selectedWpCode=null;
-
     sendAsyncRequest('GET', 'Manager', null, function(xhr) {
         if(xhr.readyState===4) 
 		{
@@ -37,15 +28,6 @@ function loadInitialData(selectedProjectId, selectedWpCode)
                     
                     populateProjectSelectors();
                     populateCollaboratorSelector();
-
-                    if(selectedProjectId) {
-                        var selProj=document.getElementById('idProgetto');
-                        var selProjMon=document.getElementById('idProgettoMonitor');
-                        if(selProj) selProj.value=selectedProjectId;
-                        if(selProjMon) selProjMon.value=selectedProjectId;
-
-                        handleProjectSelection(selectedProjectId, selectedWpCode);
-                    }
                 }
 				catch(e) 
 				{
@@ -56,17 +38,15 @@ function loadInitialData(selectedProjectId, selectedWpCode)
 	        } 
 			else
 			{
+				localStorage.clear();
 				window.location.href="login.html";
-	            console.error("Impossibile caricare i dati dall'endpoint Admin.");
 			}
         }
     });
 }
 
-// ==========================================
-// 2. NAVIGAZIONE INTERNA (TAB SWITCHING SPA)
-// ==========================================
-function initializeSectionNavigation() {
+function initializeSectionNavigation() 
+{
     var sections={
         allocation: document.getElementById('section-allocation'),
         monitorProj: document.getElementById('section-monitor-projects'),
@@ -80,102 +60,87 @@ function initializeSectionNavigation() {
         btnBack: document.getElementById('btn-back-to-allocation')
     };
 
-    if(!sections.allocation || !sections.monitorProj || !sections.monitorCollab ||
-        !buttons.monitorProj || !buttons.monitorCollab || !buttons.btnBack) {
-        console.warn("Elementi di navigazione SPA non rilevati nel DOM. Funzionamento standard attivo.");
-        return;
-    }
-
-    function deactivateAll() {
+    function deactivateAll() 
+	{
         var secKeys=Object.keys(sections);
-        for (var i=0; i<secKeys.length; i++) {
+        for(var i=0; i<secKeys.length; i++) 
+		{
             var sec=sections[secKeys[i]];
-            if(sec) sec.classList.add('hidden-section');
+            if(sec) 
+				sec.classList.add('hidden-section');
         }
         
         var btnKeys=['allocation', 'monitorProj', 'monitorCollab'];
-        for (var j=0; j<btnKeys.length; j++) {
+        for(var j=0; j<btnKeys.length; j++) 
+		{
             var btn=buttons[btnKeys[j]];
-            if(btn) btn.classList.remove('btn-action--active');
+            if(btn) 
+				btn.classList.remove('btn-action--active');
         }
     }
 
-    // Gestione del click su "Monitoraggio Progetti"
     buttons.monitorProj.addEventListener('click', function() {
         deactivateAll();
         
-        // Mostra la sezione monitoraggio progetti
         sections.monitorProj.classList.remove('hidden-section');
         buttons.monitorProj.classList.add('btn-action--active');
         
-        // SPARISCE il pulsante premuto (Monitoraggio Progetti)
         buttons.monitorProj.style.display='none';
-        // Rimane visibile l'altro (Monitoraggio Collaboratori)
         buttons.monitorCollab.style.display='inline-block';
-        // Compare il pulsante "Indietro"
         buttons.btnBack.style.display='inline-block';
 
-        // Logica interna di caricamento dati progetto
         var selectProj=document.getElementById('idProgetto');
-        if(selectProj && selectProj.value) {
+        if(selectProj && selectProj.value) 
+		{
             var selectProjMon=document.getElementById('idProgettoMonitor');
-            if(selectProjMon) {
+            if(selectProjMon)
+			{
                 selectProjMon.value=selectProj.value;
                 handleMonitorProjectSelection(parseInt(selectProj.value));
             }
         }
     });
 
-    // Gestione del click su "Monitoraggio Collaboratori"
+
     buttons.monitorCollab.addEventListener('click', function() {
         deactivateAll();
         
-        // Mostra la sezione monitoraggio collaboratori
         sections.monitorCollab.classList.remove('hidden-section');
         buttons.monitorCollab.classList.add('btn-action--active');
         
-        // SPARISCE il pulsante premuto (Monitoraggio Collaboratori)
         buttons.monitorCollab.style.display='none';
-        // Rimane visibile l'altro (Monitoraggio Progetti)
         buttons.monitorProj.style.display='inline-block';
-        // Compare il pulsante "Indietro"
         buttons.btnBack.style.display='inline-block';
     });
 
-    // Funzione per tornare allo stato iniziale (Gestione Allocazioni)
-    function showAllocationView() {
+    function showAllocationView() 
+	{
         deactivateAll();
         
-        // Mostra la sezione allocazione
         sections.allocation.classList.remove('hidden-section');
-        if(buttons.allocation) buttons.allocation.classList.add('btn-action--active');
+        if(buttons.allocation) 
+			buttons.allocation.classList.add('btn-action--active');
         
-        // Ripristina entrambi i pulsanti di monitoraggio (visibili)
         buttons.monitorProj.style.display='inline-block';
         buttons.monitorCollab.style.display='inline-block';
         
-        // Nasconde il pulsante "Indietro"
         buttons.btnBack.style.display='none';
     }
 
-    // Evento per il pulsante "Indietro"
     buttons.btnBack.addEventListener('click', function() {
         showAllocationView();
     });
 
-    if(buttons.allocation) {
+    if(buttons.allocation) 
+	{
         buttons.allocation.addEventListener('click', function() {
             showAllocationView();
         });
     }
 
-    // Stato iniziale all'avvio dell'applicazione
     showAllocationView();
 }
 
-// ==========================================
-// 3. SEZIONE ALLOCAZIONE-POPOLAMENTO SELETTORI
-// ==========================================
 function populateProjectSelectors() 
 {
     var selectAlloc=document.getElementById('idProgetto');
@@ -208,6 +173,7 @@ function populateProjectSelectors()
     }
 }
 
+//Le info per i collaboratori di cui sono responsabile vengono prese da collaborators
 function populateCollaboratorSelector() 
 {
     var selectCollab=document.getElementById('idCollaboratoreMonitor');
@@ -237,17 +203,14 @@ function setupAllocationListeners()
     var btnStart=document.getElementById('btn-start-project');
 
     if(selectProj) 
-	{
         selectProj.addEventListener('change', function(e) {
             var idVal=parseInt(e.target.value);
             if(!isNaN(idVal))
                 handleProjectSelection(idVal);
 
         });
-    }
 
     if(selectWp) 
-	{
         selectWp.addEventListener('change', function(e) {
             if(selectProj) 
 			{
@@ -257,10 +220,8 @@ function setupAllocationListeners()
                     renderAllocationTasks(idProj, wpCode);
             }
         });
-    }
 
     if(btnStart) 
-	{
         btnStart.addEventListener('click', function() {
             if(selectProj) 
 			{
@@ -269,10 +230,9 @@ function setupAllocationListeners()
                     handleStartProject(idProj);
             }
         });
-    }
 }
 
-
+//Allocazione task
 function handleProjectSelection(projectId, forceSelectWpCode) 
 {
     if(forceSelectWpCode===undefined) 
@@ -361,9 +321,6 @@ function handleProjectSelection(projectId, forceSelectWpCode)
     }
 }
 
-// ==========================================
-// SEZIONE ALLOCAZIONE-GENERAZIONE DEI TASK (CORRETTA)
-// ==========================================
 function renderAllocationTasks(projectId, wpCode) 
 {
     var project=loadedData.managedProjects.find(function(p) { return p.idProgetto===projectId; });
@@ -420,7 +377,7 @@ function renderAllocationTasks(projectId, wpCode)
                 </div>`;
         });
 
-        // Generazione dei Box Mesi (ricavando le ore previste)
+        //Box mesi
         var monthsHtml='';
         for(var m=t.MeseInizio; m<=t.MeseFine; m++) 
 		{
@@ -437,7 +394,6 @@ function renderAllocationTasks(projectId, wpCode)
                 </div>`;
         }
 
-        // Card principale del Task con template literals allineato al design Thymeleaf
         card.innerHTML=`
             <div class="task-card-header">
                 <div class="task-label">TASK</div>
@@ -475,9 +431,7 @@ function renderAllocationTasks(projectId, wpCode)
     });
 }
 
-// ==========================================
-// 5. INVIO ALLOCAZIONE ASINCRONA (JSON)
-// ==========================================
+//Invio allocazione, in caso di successo il server restituisce il json del progetto 
 function submitAllocationForm(taskId, wpCode, projectId) 
 {
     var form=document.getElementById('form-alloc-task-'+taskId);
@@ -560,14 +514,12 @@ function submitAllocationForm(taskId, wpCode, projectId)
     });
 }
 
-// =================
-// 6. AVVIO PROGETTO
-// =================
+//Assegna progetto
 function handleStartProject(projectId) 
 {
     var payload={ idProgetto: projectId };
 
-    sendAsyncRequest('POST', 'Manager', payload, function(xhr) 
+    sendAsyncRequest('POST', 'DoStartProject', payload, function(xhr) 
 	{
         if(xhr.readyState===4) 
 		{
@@ -575,8 +527,8 @@ function handleStartProject(projectId)
 			{
                 showFeedback("Progetto avviato e assegnato con successo!", true);
 				
-				var project = loadedData.managedProjects.find(function(p) { 
-                    return p.idProgetto === projectId; 
+				var project=loadedData.managedProjects.find(function(p) { 
+                    return p.idProgetto===projectId; 
                 });
 
                 if(project) 
@@ -586,12 +538,14 @@ function handleStartProject(projectId)
 					populateProjectSelectors();
 
                     var selectMon=document.getElementById('idProgettoMonitor');
-                    if(selectMon) selectMon.value=projectId;
+                    if(selectMon) 
+						selectMon.value=projectId;
 					
 					handleMonitorProjectSelection(projectId);
 
                     var btnMonProj=document.getElementById('btn-show-monitor-proj');
-                    if(btnMonProj) btnMonProj.click();
+                    if(btnMonProj) 
+						btnMonProj.click();
                 }
             } 
 			else
@@ -675,10 +629,12 @@ function handleMonitorProjectSelection(projectId)
     renderProjectMatrixTable(project);
 }
 
+//Generazione tabella riassuntiva progetto
 function renderProjectMatrixTable(project) 
 {
     const table=document.getElementById('project-monitor-table');
-    if(!table) return;
+    if(!table) 
+		return;
     
     table.textContent='';
     const duration=project.durata;
@@ -795,7 +751,7 @@ function createMonitorMonthlyCellsHtml(task, duration)
     return cellsHtml;
 }
 
-
+//Termina progetto
 function handleConcludeProject(projectId) 
 {
     var payload={ idProgetto: projectId };
@@ -829,9 +785,7 @@ function handleConcludeProject(projectId)
     });
 }
 
-// =============================
-// 8. MONITORAGGIO COLLABORATORI
-// =============================
+//Monitor Collaboratori
 function handleMonitorCollaboratorSelection(collaboratorId) 
 {
     var container=document.getElementById('collaborator-projects-container');
@@ -950,6 +904,7 @@ function handleMonitorCollaboratorSelection(collaboratorId)
     });
 }
 
+//Utility
 function calculateProjectHours(project) 
 {
     var summary={

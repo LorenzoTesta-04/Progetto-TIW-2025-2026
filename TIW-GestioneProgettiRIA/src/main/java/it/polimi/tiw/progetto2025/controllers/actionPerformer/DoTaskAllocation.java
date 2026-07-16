@@ -34,8 +34,8 @@ import it.polimi.tiw.progetto2025.utils.checkAccess;
 
 public class DoTaskAllocation extends HttpServlet 
 {
-    private static final long serialVersionUID = 1L;
-    private Connection connection = null;
+    private static final long serialVersionUID=1L;
+    private Connection connection=null;
 
     @Override
     public void init() throws ServletException 
@@ -43,7 +43,7 @@ public class DoTaskAllocation extends HttpServlet
         try 
         {
             new com.mysql.cj.jdbc.Driver();
-            this.connection = DriverManager.getConnection(MyDAO.DB_URL, MyDAO.DB_USER, MyDAO.DB_PASS);
+            this.connection=DriverManager.getConnection(MyDAO.DB_URL, MyDAO.DB_USER, MyDAO.DB_PASS);
         } 
         catch(SQLException e)
         {
@@ -54,66 +54,75 @@ public class DoTaskAllocation extends HttpServlet
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
     {
-        HttpSession session = request.getSession(false);
+    	HttpSession session=request.getSession(false);
 
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
+		response.setContentType("application/json");
+		response.setCharacterEncoding("UTF-8");
+		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
 
-        if (!checkAccess.checkManager(session, response, getServletContext())) return;
+		if(!checkAccess.checkManager(session, response, getServletContext()))
+		{
+			response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+			return;
+		}
 
-        User user = (User) session.getAttribute("user");
+		User user=(User) session.getAttribute("user");
 
         // Parsing Payload JSON
-        JsonElement root = JsonParser.parseReader(request.getReader());
-        JsonObject json = root.getAsJsonObject();
+        JsonElement root=JsonParser.parseReader(request.getReader());
+        JsonObject json=root.getAsJsonObject();
 
-        if (!json.has("idProgetto") || !json.has("idTask") || !json.has("idCollaboratori") || !json.has("orePreviste")) {
+        if(!json.has("idProgetto") || !json.has("idTask") || !json.has("idCollaboratori") || !json.has("orePreviste")) 
+        {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write("{\"error\": \"Struttura dati JSON non conforme.\"}");
             return;
         }
 
-        int idProgetto = json.get("idProgetto").getAsInt();
-        int idTask = json.get("idTask").getAsInt();
+        int idProgetto=json.get("idProgetto").getAsInt();
+        int idTask=json.get("idTask").getAsInt();
         
-        JsonArray colArray = json.getAsJsonArray("idCollaboratori");
-        JsonObject oreObj = json.getAsJsonObject("orePreviste");
+        JsonArray colArray=json.getAsJsonArray("idCollaboratori");
+        JsonObject oreObj=json.getAsJsonObject("orePreviste");
 
         try 
         {
             connection.setAutoCommit(false);
             
-            ProjectDAO projectDAO = new ProjectDAO(connection);
-            WorkPackageDAO wpDAO = new WorkPackageDAO(connection);
-            TaskDAO taskDAO = new TaskDAO(connection);
-            UserDAO userDAO = new UserDAO(connection); // <-- Istanza aggiunta
+            ProjectDAO projectDAO=new ProjectDAO(connection);
+            WorkPackageDAO wpDAO=new WorkPackageDAO(connection);
+            TaskDAO taskDAO=new TaskDAO(connection);
+            UserDAO userDAO=new UserDAO(connection);
 
-            Project project = projectDAO.findProjectById(idProgetto);
-            if (project == null || project.getIdResponsabile() != user.getID()) {
-                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            Project project=projectDAO.findProjectById(idProgetto);
+            if(project==null || project.getIdResponsabile()!=user.getID()) 
+            {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().write("{\"error\": \"Non autorizzato ad operare sul progetto.\"}");
                 connection.rollback();
                 return;
             }
 
-            if (!"CREATO".equalsIgnoreCase(project.getStato().toString())) {
+            if(!"CREATO".equalsIgnoreCase(project.getStato().toString())) 
+            {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().write("{\"error\": \"Impossibile riallocare task di un progetto già avviato o chiuso.\"}");
                 connection.rollback();
                 return;
             }
 
-            Task task = taskDAO.findTaskById(idTask);
-            if (task == null) {
-                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            Task task=taskDAO.findTaskById(idTask);
+            if(task==null) 
+            {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().write("{\"error\": \"Task inesistente.\"}");
                 connection.rollback();
                 return;
             }
 
             // 1. Validazione Collaboratori a lato Server 
-            List<Integer> idCollaboratori = new ArrayList<>();
-            if (colArray == null || colArray.size() == 0) {
+            List<Integer> idCollaboratori=new ArrayList<>();
+            if(colArray == null || colArray.size() == 0) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().write("{\"error\": \"Selezionare almeno un collaboratore per il task.\"}");
                 connection.rollback();
@@ -121,8 +130,8 @@ public class DoTaskAllocation extends HttpServlet
             }
 
             for (JsonElement cElem : colArray) {
-                int idColl = cElem.getAsInt();
-                if (idColl == user.getID()) { // Controllo anti auto-assegnazione 
+                int idColl=cElem.getAsInt();
+                if(idColl == user.getID()) { // Controllo anti auto-assegnazione 
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                     response.getWriter().write("{\"error\": \"Il responsabile non può auto-assegnarsi ai task.\"}");
                     connection.rollback();
@@ -132,18 +141,21 @@ public class DoTaskAllocation extends HttpServlet
             }
 
             // 2. Validazione Mesi e Ore a lato Server 
-            Map<Integer, Integer> meseOreMap = new HashMap<>();
-            for (int m = task.getMeseInizio(); m <= task.getMeseFine(); m++) {
-                String key = String.valueOf(m);
-                if (!oreObj.has(key)) {
+            Map<Integer, Integer> meseOreMap=new HashMap<>();
+            for(int m=task.getMeseInizio(); m<=task.getMeseFine(); m++) 
+            {
+                String key=String.valueOf(m);
+                if(!oreObj.has(key)) 
+                {
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                     response.getWriter().write("{\"error\": \"Nessun valore di ore definito per il mese " + m + "\"}");
                     connection.rollback();
                     return;
                 }
 
-                int ore = oreObj.get(key).getAsInt();
-                if (ore < 0) {
+                int ore=oreObj.get(key).getAsInt();
+                if(ore<0) 
+                {
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                     response.getWriter().write("{\"error\": \"Le ore inserite non possono essere negative (Mese " + m + ")\"}");
                     connection.rollback();
@@ -152,16 +164,16 @@ public class DoTaskAllocation extends HttpServlet
                 meseOreMap.put(m, ore);
             }
 
-            // 3. AGGIORNAMENTO EFFETTIVO SUL DB (Aggiunto)
+            //Aggiornamento DB
             taskDAO.updateTaskAllocation(idTask, idCollaboratori, meseOreMap);
             
             connection.commit();
 
             //Risposta (stato progetto aggiornato)
-            JsonObject jsonResponse = new JsonObject();
-            Project p = projectDAO.findProjectById(idProgetto);
+            JsonObject jsonResponse=new JsonObject();
+            Project p=projectDAO.findProjectById(idProgetto);
             
-            JsonObject projObj = new JsonObject();
+            JsonObject projObj=new JsonObject();
             projObj.addProperty("idProgetto", p.getId());
             projObj.addProperty("nome", p.getNomeProgetto());
             projObj.addProperty("durata", p.getDurata());
@@ -169,12 +181,12 @@ public class DoTaskAllocation extends HttpServlet
             projObj.addProperty("isAssignable", projectDAO.isAssignable(p.getId())); // <-- Corretto "proj" in "p"
             
             //WPs
-            JsonArray jsonWpList = new JsonArray();
-            List<WorkPackage> wps = wpDAO.findWPsByProject(p.getId());
+            JsonArray jsonWpList=new JsonArray();
+            List<WorkPackage> wps=wpDAO.findWPsByProject(p.getId());
             
-            for (WorkPackage wp : wps) 
+            for(WorkPackage wp:wps) 
             {
-                JsonObject wpObj = new JsonObject();
+                JsonObject wpObj=new JsonObject();
                 wpObj.addProperty("idWp", wp.getCodiceWP());
                 wpObj.addProperty("TitoloWP", wp.getTitolo());
                 wpObj.addProperty("MeseInizio", wp.getMeseInizio());
@@ -182,28 +194,28 @@ public class DoTaskAllocation extends HttpServlet
                 wpObj.addProperty("NumeroOrdine", wp.getNumeroOrdine());
                 
                 // Tasks del WP
-                JsonArray jsonTaskList = new JsonArray();
-                List<Task> tasks = taskDAO.findTasksByWP(wp.getCodiceWP());
+                JsonArray jsonTaskList=new JsonArray();
+                List<Task> tasks=taskDAO.findTasksByWP(wp.getCodiceWP());
                 
-                for (Task t : tasks) 
+                for(Task t:tasks) 
                 {
-                    JsonObject taskObj = new JsonObject();
+                    JsonObject taskObj=new JsonObject();
                     taskObj.addProperty("idTask", t.getId());
                     taskObj.addProperty("TitoloTask", t.getNomeTask());
-                    taskObj.addProperty("Descrizione", t.getDescrizione() != null ? t.getDescrizione() : "");
+                    taskObj.addProperty("Descrizione", t.getDescrizione()!=null?t.getDescrizione():"");
                     taskObj.addProperty("NumeroOrdine", t.getNumeroOrdine());
                     taskObj.addProperty("MeseInizio", t.getMeseInizio());
                     taskObj.addProperty("MeseFine", t.getMeseFine());
                     
-                    JsonArray jsonOreCoppie = new JsonArray();
+                    JsonArray jsonOreCoppie=new JsonArray();
                     IntStream.rangeClosed(t.getMeseInizio(), t.getMeseFine())
                          .forEach(m -> {
-                             JsonObject coppiaObj = new JsonObject();
+                             JsonObject coppiaObj=new JsonObject();
                              
-                             int prev = t.getOrePreviste().getOrDefault(m, 0);
+                             int prev=t.getOrePreviste().getOrDefault(m, 0);
                              coppiaObj.addProperty("prevista", prev);
                              
-                             int  lav = t.getOreLavorate().getOrDefault(m, 0);
+                             int  lav=t.getOreLavorate().getOrDefault(m, 0);
                              coppiaObj.addProperty("lavorata", lav);
                              
                              jsonOreCoppie.add(coppiaObj);
@@ -212,21 +224,21 @@ public class DoTaskAllocation extends HttpServlet
                     taskObj.add("ore", jsonOreCoppie);
                     
                     // Collaboratori assegnati al task corrente
-                    JsonArray jsonCollabTask = new JsonArray();
-                    List<Integer> collabIds = taskDAO.findCollaboratorsByTask(t.getId());
+                    JsonArray jsonCollabTask=new JsonArray();
+                    List<Integer> collabIds=taskDAO.findCollaboratorsByTask(t.getId());
                     
-                    for (Integer collabId : collabIds) 
+                    for(Integer collabId:collabIds) 
                     {
-                        JsonObject collabTaskObj = new JsonObject();
+                        JsonObject collabTaskObj=new JsonObject();
                         collabTaskObj.addProperty("id", collabId);
                         
                         // Ore lavorate dal collaboratore per il task corrente       
-                        Task taskCollabDetails = taskDAO.findTaskByIdWithCollaborator(t.getId(), collabId);
-                        JsonArray jsonOreCollab = new JsonArray();
+                        Task taskCollabDetails=taskDAO.findTaskByIdWithCollaborator(t.getId(), collabId);
+                        JsonArray jsonOreCollab=new JsonArray();
                         
-                        if (taskCollabDetails != null) 
+                        if(taskCollabDetails!=null) 
                         {
-                            jsonOreCollab = taskCollabDetails.getOreLavorate().entrySet().stream()
+                            jsonOreCollab=taskCollabDetails.getOreLavorate().entrySet().stream()
                                     .map(Map.Entry::getValue)
                                     .collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
                         
@@ -279,8 +291,8 @@ public class DoTaskAllocation extends HttpServlet
     @Override
     public void destroy() 
     {
-        if (connection != null)
+        if(connection!=null)
             try { connection.close(); } 
-            catch (SQLException ignored) {}
+            catch(SQLException ignored) {}
     }
 }
