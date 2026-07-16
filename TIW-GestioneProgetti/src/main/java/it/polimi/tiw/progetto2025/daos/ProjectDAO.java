@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import it.polimi.tiw.progetto2025.beans.Project;
+import it.polimi.tiw.progetto2025.beans.WorkPackage;
 
 /**
  * Data Access Object (DAO) dedicato alla gestione della persistenza dei Progetti.
@@ -183,36 +184,22 @@ public class ProjectDAO
      * @throws SQLException se si verifica un errore durante il conteggio o il controllo dei vincoli sul DB
      */
     public boolean isAssignable(int idProgetto) throws SQLException 
-    {
-        String queryConteggio="SELECT COUNT(*) FROM "+MyDAO.TASK_TABLE+" t "+
-                               "JOIN "+MyDAO.WORK_PACKAGE_TABLE+" wp ON t.idWp=wp.idWp "+
-                               "WHERE wp.idProgetto=?";
+    {        
+        Project p=findProjectById(idProgetto);
         
-        try(PreparedStatement pstmt=connection.prepareStatement(queryConteggio)) 
-        {
-            pstmt.setInt(1, idProgetto);
-            try(ResultSet rs=pstmt.executeQuery()) 
-            {
-                if(rs.next() && rs.getInt(1)==0) return false;
+        if(p==null) return false;
 
-            }
-        }
+        WorkPackageDAO wpDAO=new WorkPackageDAO(connection);
+        List<WorkPackage> wps=wpDAO.findWPsByProject(idProgetto);
         
-        String queryVerificaVincoli="SELECT t.idTask FROM "+MyDAO.TASK_TABLE+" t "+
-                                      "JOIN "+MyDAO.WORK_PACKAGE_TABLE+" wp ON t.idWp=wp.idWp "+
-                                      "WHERE wp.idProgetto=? AND ("+
-                                      "   t.idTask NOT IN (SELECT DISTINCT idTask FROM "+MyDAO.ORE_LAVORATE_TABLE+") "+
-                                      "   OR t.idTask NOT IN (SELECT DISTINCT idTask FROM "+MyDAO.ORE_PREVISTE_TABLE+" WHERE ore > 0)"+
-                                      ") LIMIT 1";
-
-        try(PreparedStatement pstmt=connection.prepareStatement(queryVerificaVincoli)) 
-        {
-            pstmt.setInt(1, idProgetto);
-            try(ResultSet rs=pstmt.executeQuery()) 
-            {
-                return !rs.next(); 
-            }
-        }
+        if(wps==null || wps.isEmpty()) 
+        	return false;
+        
+        for(WorkPackage wp:wps)
+        	if(!wpDAO.isAssignable(wp.getCodiceWP()))
+        		return false;
+        
+        return true;
     }
 
     /**

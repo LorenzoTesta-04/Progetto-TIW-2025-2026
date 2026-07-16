@@ -40,8 +40,21 @@ public class TaskDAO
      */
     public void createTask(int idWp, String titolo, String descrizione, int meseInizio, int meseFine) throws SQLException 
     {
-        String queryTask="INSERT INTO "+MyDAO.TASK_TABLE+" (idWp, titolo, descrizione) VALUES (?, ?, ?)";
-        String queryMesi="INSERT INTO ore_previste (idTask, mese, ore) VALUES (?, ?, 0)";
+    	String select="SELECT MAX(numeroOrdine) FROM "+MyDAO.TASK_TABLE+" WHERE idWP=?";
+        String queryTask="INSERT INTO "+MyDAO.TASK_TABLE+" (idWp, titolo, descrizione, numeroOrdine) VALUES (?, ?, ?, ?)";
+        String queryMesi="INSERT INTO "+MyDAO.ORE_PREVISTE_TABLE+" (idTask, mese, ore) VALUES (?, ?, 0)";
+        
+        int nuovoOrdine=1;
+        try(PreparedStatement pstatement=connection.prepareStatement(select)) 
+        {
+            pstatement.setInt(1, idWp);
+            
+            try (ResultSet rs=pstatement.executeQuery()) 
+            {
+                if(rs.next()) nuovoOrdine=rs.getInt(1)+1;
+            }
+        }
+    	
         
         boolean oldAutoCommit=connection.getAutoCommit();
         
@@ -55,6 +68,7 @@ public class TaskDAO
                 pstmt.setInt(1, idWp);
                 pstmt.setString(2, titolo);
                 pstmt.setString(3, descrizione);
+                pstmt.setInt(4, nuovoOrdine);
                 pstmt.executeUpdate();
 
                 try(ResultSet generatedKeys=pstmt.getGeneratedKeys()) 
@@ -98,8 +112,8 @@ public class TaskDAO
     public List<Task> findTasksByWP(int idWp) throws SQLException 
     {
         Map<Integer, Task> taskMap=new LinkedHashMap<>();
-
-        String queryTasks="SELECT idTask, idWp, titolo, descrizione FROM task WHERE idWp=? ORDER BY idTask ASC";
+        
+        String queryTasks="SELECT idTask, idWp, titolo, descrizione, numeroOrdine FROM "+MyDAO.TASK_TABLE+" WHERE idWp=? ORDER BY numeroOrdine ASC";
         try(PreparedStatement pstmt=connection.prepareStatement(queryTasks)) 
         {
             pstmt.setInt(1, idWp);
@@ -113,6 +127,7 @@ public class TaskDAO
                     t.setIdWp(rs.getInt("idWp"));
                     t.setNomeTask(rs.getString("titolo"));
                     t.setDescrizione(rs.getString("descrizione"));
+                    t.setNumeroOrdine(rs.getInt("numeroOrdine"));
                     taskMap.put(idTask, t);
                 }
             }
@@ -120,8 +135,8 @@ public class TaskDAO
 
         if(taskMap.isEmpty()) return new ArrayList<>();
 
-        String queryOrePreviste="SELECT op.idTask, op.mese, op.ore FROM ore_previste op "+
-                                  "JOIN task t ON op.idTask=t.idTask WHERE t.idWp=? ORDER BY op.mese ASC";
+        String queryOrePreviste="SELECT op.idTask, op.mese, op.ore FROM "+MyDAO.ORE_PREVISTE_TABLE+" op "+
+        		"JOIN "+MyDAO.TASK_TABLE+" t ON op.idTask=t.idTask WHERE t.idWp=? ORDER BY op.mese ASC";
         try(PreparedStatement pstmt=connection.prepareStatement(queryOrePreviste)) 
         {
             pstmt.setInt(1, idWp);
@@ -135,8 +150,8 @@ public class TaskDAO
             }
         }
 
-        String queryOreLavorate="SELECT ol.idTask, ol.mese, SUM(ol.ore) AS totale_ore FROM ore_lavorate ol "+
-                                  "JOIN task t ON ol.idTask=t.idTask WHERE t.idWp=? GROUP BY ol.idTask, ol.mese";
+        String queryOreLavorate="SELECT ol.idTask, ol.mese, SUM(ol.ore) AS totale_ore FROM "+MyDAO.ORE_LAVORATE_TABLE+" ol "+
+                                  "JOIN "+MyDAO.TASK_TABLE+" t ON ol.idTask=t.idTask WHERE t.idWp=? GROUP BY ol.idTask, ol.mese";
         try(PreparedStatement pstmt=connection.prepareStatement(queryOreLavorate)) 
         {
             pstmt.setInt(1, idWp);
@@ -163,7 +178,7 @@ public class TaskDAO
 	{
 		List<Integer> ids=new ArrayList<>();
 		
-		String query="SELECT idCollaboratore FROM ore_lavorate WHERE idTask=?";
+		String query="SELECT idCollaboratore FROM "+MyDAO.ORE_LAVORATE_TABLE+" WHERE idTask=?";
 		try(PreparedStatement pstmt=connection.prepareStatement(query)) 
         {
             pstmt.setInt(1, idTask);
@@ -188,7 +203,7 @@ public class TaskDAO
 	{	
 		Map<Integer, Integer> ore=new HashMap<>();
 		
-		String query="SELECT mese, ore FROM ore_previste WHERE idTask=? ORDER BY mese ASC";
+		String query="SELECT mese, ore FROM "+MyDAO.ORE_PREVISTE_TABLE+" WHERE idTask=? ORDER BY mese ASC";
 		try(PreparedStatement pstmt=connection.prepareStatement(query)) 
         {
             pstmt.setInt(1, idTask);
@@ -213,7 +228,7 @@ public class TaskDAO
 	{
 	    Task t=null;
 	    
-	    String query="SELECT idTask, idWp, titolo, descrizione FROM task WHERE idTask=?";
+	    String query="SELECT idTask, idWp, titolo, descrizione, numeroOrdine FROM "+MyDAO.TASK_TABLE+" WHERE idTask=?";
 	    try(PreparedStatement pstmt=connection.prepareStatement(query)) 
 	    {
 	        pstmt.setInt(1, idTask);
@@ -226,13 +241,14 @@ public class TaskDAO
 	                t.setIdWp(rs.getInt("idWp"));
 	                t.setNomeTask(rs.getString("titolo"));
 	                t.setDescrizione(rs.getString("descrizione"));
+	                t.setNumeroOrdine(rs.getInt("numeroOrdine"));
 	            }
 	        }
 	    }
 	    
 	    if(t==null) return null;
 	    
-	    query="SELECT mese, ore FROM ore_previste WHERE idTask=? ORDER BY mese ASC";
+	    query="SELECT mese, ore FROM "+MyDAO.ORE_PREVISTE_TABLE+" WHERE idTask=? ORDER BY mese ASC";
 	    try(PreparedStatement pstmt=connection.prepareStatement(query)) 
 	    {
 	        pstmt.setInt(1, idTask);
@@ -244,7 +260,7 @@ public class TaskDAO
 	    }
 	    
 
-	    query="SELECT mese, SUM(ore) AS totale_ore FROM ore_lavorate WHERE idTask=? GROUP BY mese";
+	    query="SELECT mese, SUM(ore) AS totale_ore FROM "+MyDAO.ORE_LAVORATE_TABLE+" WHERE idTask=? GROUP BY mese";
 	    try(PreparedStatement pstmt=connection.prepareStatement(query)) 
 	    {
 	        pstmt.setInt(1, idTask);
@@ -270,7 +286,7 @@ public class TaskDAO
 	{
 	    Task t=null;
 	    
-	    String query="SELECT idTask, idWp, titolo, descrizione FROM task WHERE idTask=?";
+	    String query="SELECT idTask, idWp, titolo, descrizione, numeroOrdine FROM "+MyDAO.TASK_TABLE+" WHERE idTask=? ORDER BY numeroOrdine ASC";
 	    try(PreparedStatement pstmt=connection.prepareStatement(query)) 
 	    {
 	        pstmt.setInt(1, idTask);
@@ -283,13 +299,14 @@ public class TaskDAO
 	                t.setIdWp(rs.getInt("idWp"));
 	                t.setNomeTask(rs.getString("titolo"));
 	                t.setDescrizione(rs.getString("descrizione"));
+	                t.setNumeroOrdine(rs.getInt("numeroOrdine"));
 	            }
 	        }
 	    }
 	    
 	    if(t==null) return null;
 	    
-	    query="SELECT mese, ore FROM ore_previste WHERE idTask=? ORDER BY mese ASC";
+	    query="SELECT mese, ore FROM "+MyDAO.ORE_PREVISTE_TABLE+" WHERE idTask=? ORDER BY mese ASC";
 	    try(PreparedStatement pstmt=connection.prepareStatement(query)) 
 	    {
 	        pstmt.setInt(1, idTask);
@@ -301,7 +318,7 @@ public class TaskDAO
 	    }
 	    
 
-	    query="SELECT mese, ore FROM ore_lavorate WHERE idTask=? AND idCollaboratore=? GROUP BY mese";
+	    query="SELECT mese, ore FROM "+MyDAO.ORE_LAVORATE_TABLE+" WHERE idTask=? AND idCollaboratore=? GROUP BY mese";
 	    try(PreparedStatement pstmt=connection.prepareStatement(query)) 
 	    {
 	        pstmt.setInt(1, idTask);
@@ -327,10 +344,10 @@ public class TaskDAO
      */
 	public void updateTaskAllocation(int idTask, List<Integer> idCollaboratori, Map<Integer, Integer> meseOreMap) throws SQLException 
 	{
-        String deleteLavorate="DELETE FROM ore_lavorate WHERE idTask=?";
-        String deletePreviste="DELETE FROM ore_previste WHERE idTask=?";
-        String insertPreviste="INSERT INTO ore_previste (idTask, mese, ore) VALUES (?, ?, ?)";
-        String insertLavorate="INSERT INTO ore_lavorate (idTask, idCollaboratore, mese, ore) VALUES (?, ?, ?, 0)";
+        String deleteLavorate="DELETE FROM "+MyDAO.ORE_LAVORATE_TABLE+" WHERE idTask=?";
+        String deletePreviste="DELETE FROM "+MyDAO.ORE_PREVISTE_TABLE+" WHERE idTask=?";
+        String insertPreviste="INSERT INTO "+MyDAO.ORE_PREVISTE_TABLE+" (idTask, mese, ore) VALUES (?, ?, ?)";
+        String insertLavorate="INSERT INTO "+MyDAO.ORE_LAVORATE_TABLE+" (idTask, idCollaboratore, mese, ore) VALUES (?, ?, ?, 0)";
 
         boolean oldAutoCommit=connection.getAutoCommit();
         try 
@@ -401,8 +418,8 @@ public class TaskDAO
 	{
         Map<Integer, Task> taskMap=new LinkedHashMap<>();
 
-        String queryTasks="SELECT DISTINCT t.idTask, t.titolo, t.descrizione, t.idWp FROM task t "+
-                             "JOIN ore_lavorate ol ON ol.idTask=t.idTask WHERE t.idWp=? AND ol.idCollaboratore=?";
+        String queryTasks="SELECT DISTINCT t.idTask, t.titolo, t.descrizione, t.idWp, t.numeroOrdine FROM "+MyDAO.TASK_TABLE+" t "+
+                             "JOIN "+MyDAO.ORE_LAVORATE_TABLE+" ol ON ol.idTask=t.idTask WHERE t.idWp=? AND ol.idCollaboratore=?";
         try(PreparedStatement pstmt=connection.prepareStatement(queryTasks)) 
         {
             pstmt.setInt(1, idWp);
@@ -417,6 +434,7 @@ public class TaskDAO
                     t.setIdWp(rs.getInt("idWp"));
                     t.setNomeTask(rs.getString("titolo"));
                     t.setDescrizione(rs.getString("descrizione"));
+                    t.setNumeroOrdine(rs.getInt("numeroOrdine"));
                     taskMap.put(idTask, t);
                 }
             }
@@ -424,8 +442,8 @@ public class TaskDAO
 
         if(taskMap.isEmpty()) return new ArrayList<>();
 
-        String queryOrePreviste="SELECT op.idTask, op.mese, op.ore FROM ore_previste op "+
-                                  "JOIN task t ON op.idTask=t.idTask WHERE t.idWp=? ORDER BY op.mese ASC";
+        String queryOrePreviste="SELECT op.idTask, op.mese, op.ore FROM "+MyDAO.ORE_PREVISTE_TABLE+" op "+
+                                  "JOIN "+MyDAO.TASK_TABLE+" t ON op.idTask=t.idTask WHERE t.idWp=? ORDER BY op.mese ASC";
         try(PreparedStatement pstmt=connection.prepareStatement(queryOrePreviste)) 
         {
             pstmt.setInt(1, idWp);
@@ -439,8 +457,8 @@ public class TaskDAO
             }
         }
 
-        String queryOreLavorate="SELECT ol.idTask, ol.mese, ol.ore FROM ore_lavorate ol "+
-                                  "JOIN task t ON ol.idTask=t.idTask WHERE t.idWp=? AND ol.idCollaboratore=? ORDER BY ol.mese ASC";
+        String queryOreLavorate="SELECT ol.idTask, ol.mese, ol.ore FROM "+MyDAO.ORE_LAVORATE_TABLE+" ol "+
+        		"JOIN "+MyDAO.TASK_TABLE+" t ON ol.idTask=t.idTask WHERE t.idWp=? AND ol.idCollaboratore=? ORDER BY ol.mese ASC";
         try(PreparedStatement pstmt=connection.prepareStatement(queryOreLavorate)) 
         {
             pstmt.setInt(1, idWp);
@@ -469,7 +487,7 @@ public class TaskDAO
      */
 	public void updateHours(int idTask, int idCollaboratore, int mese, int oreLavorate) throws SQLException 
 	{
-		String query="UPDATE ore_lavorate SET ore=? WHERE idTask=? AND idCollaboratore=? AND mese=?";
+		String query="UPDATE "+MyDAO.ORE_LAVORATE_TABLE+" SET ore=? WHERE idTask=? AND idCollaboratore=? AND mese=?";
 		
 		try(PreparedStatement pstmt=connection.prepareStatement(query)) 
         {
@@ -480,5 +498,32 @@ public class TaskDAO
         	
         	pstmt.executeUpdate();
         }		
+	}
+	
+    /**
+     * Verifica che un task sia valido per l'assegnazione di un progetto.
+     * @param id identificativo del task da validare
+     * @return {@code true} se è valido, {@code else} altrimenti
+     * @throws SQLException se si verifica un errore
+     */
+	public boolean isAssignable(int id) throws SQLException 
+	{
+		Task t=findTaskById(id);
+		
+		 if(t==null) 
+			 return false;
+		
+		 List<Integer> collaborators=findCollaboratorsByTask(t.getId());
+		 
+		 if(collaborators==null || collaborators.isEmpty())
+			 return false;
+		 
+		 if(t.getOrePreviste()==null || t.getOrePreviste().isEmpty())
+			 return false;
+		 
+		return t.getOrePreviste().entrySet().stream()
+	            .allMatch(entry -> entry.getKey()>=t.getMeseInizio() 
+                && entry.getKey()<=t.getMeseFine() 
+                && entry.getValue()>0);
 	}
 }

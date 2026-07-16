@@ -2,8 +2,9 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
 	<meta charset="UTF-8">
-	<title>Monitoraggio Collaboratori</title>
+	<title>Home Responsabile</title>
 	<link rel="stylesheet" type="text/css" media="all" href="./css/style.css" th:href="@{./css/style.css}" />
+	<link rel="icon" type="image/x-icon" href="./img/logo.png">
 </head>
 <body>
 	<div class="admin-header">
@@ -78,12 +79,12 @@
 							</thead>
 							<tbody>
 								<th:block th:each="wp:${p.wps}">
-									<tr th:each="task, iterStat:${wp.tasks}">
-										<td th:if="${iterStat.first}"
+									<tr th:each="task, taskStat:${wp.tasks}">
+        								<td th:if="${taskStat.first}"
 											th:rowspan="${wp.tasks.size()}"
-											th:text="${wp.titolo}"
+											th:text="${wp.numeroOrdine+'. '+wp.titolo}"
 											class="td-wp-name">Nome WP</td>
-										<td th:text="${task.nomeTask}" style="text-align: left; padding-left: 10px;">Nome Task</td>
+										<td th:text="${wp.numeroOrdine+'.'+task.numeroOrdine+' '+task.nomeTask}" style="text-align: left; padding-left: 10px;">Nome Task</td>
 										<th:block th:each="m:${#numbers.sequence(1, p.durata)}">
 											<td th:text="${task.oreLavorate.containsKey(m)}?${task.oreLavorate.get(m)}:'-'" class="task-time-lavorate">-</td>
 										</th:block>

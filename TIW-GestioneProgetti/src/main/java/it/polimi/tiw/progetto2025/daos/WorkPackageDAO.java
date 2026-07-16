@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import it.polimi.tiw.progetto2025.beans.Task;
 import it.polimi.tiw.progetto2025.beans.WorkPackage;
 
 /**
@@ -33,13 +34,28 @@ public class WorkPackageDAO
      */
     public void createWorkPackage(int idProgetto, String titolo, int meseInizio, int meseFine) throws SQLException 
     {
-        String query="INSERT INTO "+MyDAO.WORK_PACKAGE_TABLE+" (idProgetto, titolo, meseInizio, meseFine) VALUES (?, ?, ?, ?)";
+    	int nuovoOrdine=1;
+    	String select="SELECT MAX(numeroOrdine) FROM "+MyDAO.WORK_PACKAGE_TABLE+" WHERE idProgetto=?";
+   
+    	try(PreparedStatement pstatement=connection.prepareStatement(select)) 
+        {
+            pstatement.setInt(1, idProgetto);
+            
+            try (ResultSet rs=pstatement.executeQuery()) 
+            {
+                if(rs.next()) nuovoOrdine=rs.getInt(1)+1;
+            }
+        }
+    	
+    	
+        String query="INSERT INTO "+MyDAO.WORK_PACKAGE_TABLE+" (idProgetto, numeroOrdine, titolo, meseInizio, meseFine) VALUES (?, ?, ?, ?, ?)";
         try(PreparedStatement pstatement=connection.prepareStatement(query)) 
         {
             pstatement.setInt(1, idProgetto);
-            pstatement.setString(2, titolo);
-            pstatement.setInt(3, meseInizio);
-            pstatement.setInt(4, meseFine);
+            pstatement.setInt(2, nuovoOrdine);
+            pstatement.setString(3, titolo);
+            pstatement.setInt(4, meseInizio);
+            pstatement.setInt(5, meseFine);
             
             pstatement.executeUpdate();
         }
@@ -55,13 +71,13 @@ public class WorkPackageDAO
     public List<WorkPackage> findAllAvailableWPs(int idCreatore) throws SQLException
     {
     	List<WorkPackage> list=new ArrayList<>();
-        String query="SELECT idWP, wp.idProgetto, titolo, meseInizio, meseFine "+
+        String query="SELECT idWP, wp.idProgetto, titolo, meseInizio, meseFine, numeroOrdine "+
                        "FROM "+MyDAO.WORK_PACKAGE_TABLE+" wp "+
                        "JOIN "+MyDAO.PROJECT_TABLE+" p ON wp.idProgetto=p.id "+
                        "WHERE idCreatore=? AND (p.stato='CREATO' OR p.stato='ASSEGNATO') "+
-                       "ORDER BY idProgetto, idWP ASC";
+                       "ORDER BY idProgetto, numeroOrdine ASC";
 
-        try (PreparedStatement pstmt=connection.prepareStatement(query)) 
+        try(PreparedStatement pstmt=connection.prepareStatement(query)) 
         {
             pstmt.setInt(1, idCreatore);
             try (ResultSet rs=pstmt.executeQuery()) 
@@ -74,6 +90,7 @@ public class WorkPackageDAO
                     wp.setTitolo(rs.getString("titolo"));
                     wp.setMeseInizio(rs.getInt("meseInizio"));
                     wp.setMeseFine(rs.getInt("meseFine"));
+                    wp.setNumeroOrdine(rs.getInt("numeroOrdine"));
                     list.add(wp);
                 }
             }
@@ -89,7 +106,7 @@ public class WorkPackageDAO
      */
     public WorkPackage findWPById(int idWP) throws SQLException 
     {
-        String query="SELECT idWP, idProgetto, titolo, meseInizio, meseFine FROM "+MyDAO.WORK_PACKAGE_TABLE+" WHERE idWP=?";
+        String query="SELECT idWP, idProgetto, titolo, meseInizio, meseFine, numeroOrdine FROM "+MyDAO.WORK_PACKAGE_TABLE+" WHERE idWP=?";
         try(PreparedStatement pstmt=connection.prepareStatement(query)) 
         {
             pstmt.setInt(1, idWP);
@@ -103,6 +120,7 @@ public class WorkPackageDAO
                     wp.setTitolo(rs.getString("titolo"));
                     wp.setMeseInizio(rs.getInt("meseInizio"));
                     wp.setMeseFine(rs.getInt("meseFine"));
+                    wp.setNumeroOrdine(rs.getInt("numeroOrdine"));
                     return wp;
                 }
             }
@@ -119,7 +137,7 @@ public class WorkPackageDAO
     public List<WorkPackage> findWPsByProject(int idProgetto) throws SQLException 
     {
     	List<WorkPackage> list=new ArrayList<>();	
-        String query="SELECT idWP, titolo, meseInizio, meseFine FROM "+MyDAO.WORK_PACKAGE_TABLE+" WHERE idProgetto=?";
+        String query="SELECT idWP, titolo, meseInizio, meseFine, numeroOrdine FROM "+MyDAO.WORK_PACKAGE_TABLE+" WHERE idProgetto=? ORDER BY numeroOrdine";
         
         try(PreparedStatement pstmt=connection.prepareStatement(query)) 
         {
@@ -133,6 +151,7 @@ public class WorkPackageDAO
                 wp.setTitolo(rs.getString("titolo"));
                 wp.setMeseInizio(rs.getInt("meseInizio"));
                 wp.setMeseFine(rs.getInt("meseFine"));
+                wp.setNumeroOrdine(rs.getInt("numeroOrdine"));
                 
                 list.add(wp);
             }
@@ -150,7 +169,7 @@ public class WorkPackageDAO
     public List<WorkPackage> findWPsWithCollaboratorInProject(int idProgetto, int idCollaboratore) throws SQLException 
     {
     	List<WorkPackage> list=new ArrayList<>();	
-    	String query="SELECT DISTINCT wp.idWP, wp.titolo, wp.meseInizio, wp.meseFine "+
+    	String query="SELECT DISTINCT wp.idWP, wp.titolo, wp.meseInizio, wp.meseFine, wp.numeroOrdine "+
                 "FROM "+MyDAO.WORK_PACKAGE_TABLE+" wp "+
                 "JOIN "+MyDAO.TASK_TABLE+" t ON t.idWp=wp.idWP "+
                 "JOIN "+MyDAO.ORE_LAVORATE_TABLE+" ol ON ol.idTask=t.idTask "+
@@ -169,11 +188,35 @@ public class WorkPackageDAO
                 wp.setTitolo(rs.getString("titolo"));
                 wp.setMeseInizio(rs.getInt("meseInizio"));
                 wp.setMeseFine(rs.getInt("meseFine"));
-                
+                wp.setNumeroOrdine(rs.getInt("numeroOrdine"));
                 list.add(wp);
             }
         }
         return list;
     }
     
+    /**
+     * Verifica che l'intero wp sia valido per l'assegnazione di un progetto.
+     * @param codiceWP identificativo del WP da validare
+     * @return {@code true} se è valido, {@code else} altrimenti
+     * @throws SQLException se si verifica un errore
+     */
+	public boolean isAssignable(int codiceWP) throws SQLException 
+	{
+		WorkPackage wp=findWPById(codiceWP);
+		
+		 if(wp==null) return false;
+		 
+		 TaskDAO tDAO=new TaskDAO(connection);
+		 List<Task> tasks=tDAO.findTasksByWP(codiceWP);
+		 
+		 if(tasks==null || tasks.isEmpty()) 
+			 return false;
+		 
+		 for(Task t:tasks)
+        	if(!tDAO.isAssignable(t.getId()))
+        		return false;
+		
+		return true;
+	} 
 }

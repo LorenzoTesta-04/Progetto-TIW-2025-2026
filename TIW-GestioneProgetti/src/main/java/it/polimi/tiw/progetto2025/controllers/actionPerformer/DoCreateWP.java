@@ -81,10 +81,7 @@ public class DoCreateWP extends HttpServlet
             try 
             {
             	int finalIdProgetto=idProgetto;
-                Project proj=projectDAO.findAllProjects(user.getID()).stream()
-                        .filter(p -> p.getId()==finalIdProgetto)
-                        .findFirst()
-                        .orElse(null);
+                Project proj=projectDAO.findProjectById(idProgetto);
 
                 if(proj==null) errorMsg="Progetto non valido o inesistente.";
                 else if(meseFine>proj.getDurata()) errorMsg="Il termine del WP eccede la durata massima del progetto ("+proj.getDurata()+" mesi).";

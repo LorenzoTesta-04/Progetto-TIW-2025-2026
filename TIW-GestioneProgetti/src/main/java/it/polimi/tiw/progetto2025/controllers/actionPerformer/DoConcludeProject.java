@@ -49,7 +49,7 @@ public class DoConcludeProject extends HttpServlet
         if(idProgettoStr==null || idProgettoStr.isEmpty()) 
         {
             if(session!=null) session.setAttribute("errorMsg", "Identificativo del progetto mancante.");
-            response.sendRedirect(getServletContext().getContextPath() + "/MonitorProjects");
+            response.sendRedirect(getServletContext().getContextPath()+"/MonitorProjects");
             return;
         }
 
@@ -64,20 +64,18 @@ public class DoConcludeProject extends HttpServlet
             
             if(project!=null && project.getIdResponsabile()==user.getID()) 
             {
-                if("CONCLUSO".equals(project.getStato())) 
-                    errorMsg="Il progetto risulta già concluso.";
-                else 
+                if("ASSEGNATO".equals(project.getStato())) 
                 {
                     projectDAO.updateProjectState(idProgetto, Project.projectState.CONCLUSO);
                     if(session!=null) session.setAttribute("successMsg", "Progetto concluso con successo!");
                     response.sendRedirect(redirectUrl);
                     return;
                 }
+                else
+                    errorMsg="Impossibile concludere il progetto.";
             }
             else 
-            {
                 errorMsg="Non sei autorizzato a modificare questo progetto o il progetto non esiste.";
-            }
             
         } 
         catch(NumberFormatException e) 

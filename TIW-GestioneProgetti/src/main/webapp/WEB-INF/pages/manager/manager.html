@@ -2,8 +2,9 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
 	<meta charset="UTF-8">
-	<title>Area Responsabile e Gestione Allocazioni</title>
+	<title>Home Responsabile</title>
 	<link rel="stylesheet" type="text/css" media="all" href="./css/style.css" th:href="@{./css/style.css}" />
+	<link rel="icon" type="image/x-icon" href="./img/logo.png">
 </head>
 <body>
 	<div class="admin-header">
@@ -57,7 +58,7 @@
 								th:disabled="${!isAssignable}"
 								th:classappend="${!isAssignable}?' btn-assign--disabled':''"
 								th:title="${!isAssignable}?'Impossibile assegnare: verifica i requisiti':'Procedi con l\'assegnazione'">
-							Avvia ed Assegna Progetto
+							Assegna ed Avvia Progetto
 						</button>
 					</form>
 				</div>
@@ -85,7 +86,7 @@
 
 			<div th:if="${selectedWP!=null}" class="tasks-scroll-container" style="margin-top: 25px;">
 				<div class="sticky-wp-header">
-					<h4><span th:text="${selectedWP.titolo}">WP</span></h4>
+					<h4><span th:text="${selectedWP.numeroOrdine+'. '+selectedWP.titolo}">WP</span></h4>
 					<div class="wp-validity-info">
 						Validità WP: <span th:text="${'Mese '+selectedWP.meseInizio}">1</span>
 						&rarr; <span th:text="${'Mese '+selectedWP.meseFine}">1</span>
@@ -100,7 +101,7 @@
 					<div th:each="t:${tasks}" class="task-card">
 						<div class="task-card-header">
 							<div class="task-label">TASK</div>
-							<strong class="task-title" th:text="${t.nomeTask}">Nome Task</strong>
+							<strong class="task-title" th:text="${selectedWP.numeroOrdine+'.'+t.numeroOrdine+' '+t.nomeTask}">Nome Task</strong>
 							<p class="task-description" th:text="${t.descrizione}">Descrizione</p>
 						</div>
 

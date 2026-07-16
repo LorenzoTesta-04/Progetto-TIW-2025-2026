@@ -2,8 +2,9 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
 	<meta charset="UTF-8">
-	<title>Pannello di Controllo Amministratore</title>
+	<title>Home amministratore</title>
 	<link rel="stylesheet" type="text/css" media="all" href="./css/style.css" th:href="@{./css/style.css}" />
+	<link rel="icon" type="image/x-icon" href="./img/logo.png">
 </head>
 <body>
 	<!-- HEADER DI AMMINISTRAZIONE -->
@@ -108,7 +109,7 @@
 								<option th:each="p:${activeProjects}" th:value="${p.id}" th:text="${p.nomeProgetto}" th:selected="${selectedProgettoId!=null and p.id.toString()==selectedProgettoId}">
 								</option>
 							</select>
-							<button type="submit" class="btn-load">Carica</button>
+							<button type="submit" class="btn-load" style="padding: 10px 14px">Carica</button>
 						</div>
 					</div>
 				</form>

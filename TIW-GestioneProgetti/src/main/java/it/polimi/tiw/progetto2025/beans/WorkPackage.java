@@ -11,15 +11,17 @@ public class WorkPackage
     private int meseInizio;
     private int meseFine; 
     private List<Task> tasks;
+    private int numeroOrdine;
 
     public WorkPackage() {}
 
-    public WorkPackage(int idProgetto, int codiceWP, String titolo, int meseInizio, int meseFine) {
+    public WorkPackage(int idProgetto, int codiceWP, String titolo, int meseInizio, int meseFine, int numeroOrdine) {
         this.idProgetto=idProgetto;
         this.codiceWP=codiceWP;
         this.titolo=titolo;
         this.meseInizio=meseInizio;
         this.meseFine=meseFine;
+        this.numeroOrdine=numeroOrdine;
         this.tasks=new ArrayList<>();
     }
 
@@ -29,6 +31,7 @@ public class WorkPackage
     public int getMeseInizio() {return meseInizio;}
     public int getMeseFine() {return meseFine;}
     public List<Task> getTasks() {return this.tasks;}
+    public int getNumeroOrdine() {return numeroOrdine;}
     
     public void setIdProgetto(int idProgetto) {this.idProgetto=idProgetto;}
     public void setCodiceWP(int codiceWP) {this.codiceWP=codiceWP;}
@@ -36,4 +39,5 @@ public class WorkPackage
     public void setMeseInizio(int meseInizio) {this.meseInizio=meseInizio;}
     public void setMeseFine(int meseFine) {this.meseFine=meseFine;}
     public void setTasks(List<Task> tasks) {this.tasks=tasks;}
+    public void setNumeroOrdine(int numeroOrdine) {this.numeroOrdine=numeroOrdine;}
 }

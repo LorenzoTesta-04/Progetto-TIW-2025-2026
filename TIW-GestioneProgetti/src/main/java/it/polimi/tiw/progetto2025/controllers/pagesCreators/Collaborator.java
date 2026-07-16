@@ -62,18 +62,18 @@ public class Collaborator extends HttpServlet
 	@Override
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
 	{
-		 HttpSession session=request.getSession(false);
-		 
-		 response.setContentType("text/html");
-		 response.setCharacterEncoding("UTF-8");
-		 response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); 
-		 response.setHeader("Pragma", "no-cache"); 
-		 response.setDateHeader("Expires", 0);
-		 
-		 IWebExchange exchange=this.webApplication.buildExchange(request, response);
-		 WebContext ctx=new WebContext(exchange, request.getLocale());
-	 
-		 if(!checkAccess.checkCollaborator(session, response, getServletContext())) return;
+		HttpSession session=request.getSession(false);
+		
+		response.setContentType("text/html");
+		response.setCharacterEncoding("UTF-8");
+		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); 
+		response.setHeader("Pragma", "no-cache"); 
+		response.setDateHeader("Expires", 0);
+		
+		IWebExchange exchange=this.webApplication.buildExchange(request, response);
+		WebContext ctx=new WebContext(exchange, request.getLocale());
+	
+		if(!checkAccess.checkCollaborator(session, response, getServletContext())) return;
 
 		User user=(User) session.getAttribute("user");
 		ProjectDAO projectDAO=new ProjectDAO(connection);
@@ -178,9 +178,9 @@ public class Collaborator extends HttpServlet
 
 		} 
 		catch(SQLException | NumberFormatException e)
-        {
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Errore nel caricamento della dashboard amministratore");
-        }
+		{
+			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Errore nel caricamento della dashboard amministratore");
+		}
 	}
 
 	@Override

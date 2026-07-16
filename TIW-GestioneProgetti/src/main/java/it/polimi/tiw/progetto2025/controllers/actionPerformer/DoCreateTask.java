@@ -58,7 +58,6 @@ public class DoCreateTask extends HttpServlet
 		WorkPackage chosenWP=null;
 		
 		WorkPackageDAO workPackageDAO=new WorkPackageDAO(connection);
-		TaskDAO taskDAO=new TaskDAO(connection);
 
 		try 
 		{
@@ -95,6 +94,7 @@ public class DoCreateTask extends HttpServlet
 
 		if(errorMsg==null) 
 		{
+			TaskDAO taskDAO=new TaskDAO(connection);
 			try 
 			{
 				taskDAO.createTask(idWP, nomeTask, descrizione, meseInizio, meseFine);

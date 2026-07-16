@@ -70,11 +70,11 @@ public class DoLogin extends HttpServlet
 			else if(user.isManager() && user.isCollaborator()) response.sendRedirect(contextPath+"/ChooseRole");
 			else if(user.isCollaborator()) response.sendRedirect(contextPath+"/Collaborator");
 			else if(user.isManager()) response.sendRedirect(contextPath+"/Manager");
-			else response.sendRedirect(contextPath+"/Login?error_msg="+URLEncoder.encode("Utente non assegnato", "UTF-8"));
+			else response.sendRedirect(contextPath+"/Login?error_msg="+URLEncoder.encode("Nessun ruolo assegnato. Contattare l'amministratore.", "UTF-8"));
 		}
 		catch(CheckAuthException e)
 		{
-			response.sendRedirect(contextPath+"/Login?error_msg="+URLEncoder.encode("Credenziali non valide", "UTF-8"));
+			response.sendRedirect(contextPath+"/Login?error_msg="+URLEncoder.encode("Credenziali non valide.", "UTF-8"));
 		} 
 		catch(DBException e) 
 		{

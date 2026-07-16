@@ -30,30 +30,30 @@ import it.polimi.tiw.progetto2025.utils.checkAccess;
 
 public class MonitorCollaborators extends HttpServlet 
 {
-    private static final long serialVersionUID = 1L;
-    private Connection connection = null;
+    private static final long serialVersionUID=1L;
+    private Connection connection=null;
     private TemplateEngine templateEngine;
     private JakartaServletWebApplication webApplication;
 
     @Override
     public void init() throws ServletException 
     {
-        ServletContext servletContext = getServletContext();
-        this.webApplication = JakartaServletWebApplication.buildApplication(servletContext);
+        ServletContext servletContext=getServletContext();
+        this.webApplication=JakartaServletWebApplication.buildApplication(servletContext);
         
-        WebApplicationTemplateResolver templateResolver = new WebApplicationTemplateResolver(this.webApplication);
+        WebApplicationTemplateResolver templateResolver=new WebApplicationTemplateResolver(this.webApplication);
         templateResolver.setTemplateMode(TemplateMode.HTML);
         templateResolver.setPrefix("/WEB-INF/pages/manager/");
         templateResolver.setSuffix(".html");
         templateResolver.setCharacterEncoding("UTF-8");
         
-        this.templateEngine = new TemplateEngine();
+        this.templateEngine=new TemplateEngine();
         this.templateEngine.setTemplateResolver(templateResolver);
         
         try 
         {
             new com.mysql.cj.jdbc.Driver();
-            this.connection = DriverManager.getConnection(MyDAO.DB_URL, MyDAO.DB_USER, MyDAO.DB_PASS);
+            this.connection=DriverManager.getConnection(MyDAO.DB_URL, MyDAO.DB_USER, MyDAO.DB_PASS);
         } 
         catch(SQLException e) 
         {
@@ -62,7 +62,7 @@ public class MonitorCollaborators extends HttpServlet
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
     {
         HttpSession session=request.getSession(false);
             
@@ -72,7 +72,7 @@ public class MonitorCollaborators extends HttpServlet
         response.setHeader("Pragma", "no-cache"); 
         response.setDateHeader("Expires", 0);
         
-        IWebExchange exchange = this.webApplication.buildExchange(request, response);
+        IWebExchange exchange=this.webApplication.buildExchange(request, response);
         WebContext ctx=new WebContext(exchange, request.getLocale());
     
         // Controllo accesso: deve essere loggato e deve essere MANAGER
@@ -80,10 +80,10 @@ public class MonitorCollaborators extends HttpServlet
 
         User user=(User)session.getAttribute("user");
             
-        ProjectDAO projectDAO = new ProjectDAO(connection);
-        WorkPackageDAO wpDAO = new WorkPackageDAO(connection);
-        TaskDAO taskDAO = new TaskDAO(connection);
-        UserDAO userDAO = new UserDAO(connection);
+        ProjectDAO projectDAO=new ProjectDAO(connection);
+        WorkPackageDAO wpDAO=new WorkPackageDAO(connection);
+        TaskDAO taskDAO=new TaskDAO(connection);
+        UserDAO userDAO=new UserDAO(connection);
         
         String idCollaboratoreStr=request.getParameter("idCollaboratore");
 

@@ -2,8 +2,9 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
 	<meta charset="UTF-8">
-	<title>Inserimento Ore di Lavoro</title>
+	<title>Home Collaboratore</title>
 	<link rel="stylesheet" type="text/css" media="all" href="./css/style.css" th:href="@{./css/style.css}" />
+	<link rel="icon" type="image/x-icon" href="./img/logo.png">
 </head>
 <body>
 	<div class="admin-header">
@@ -54,10 +55,10 @@
 					<select name="idTask" id="idTask" required class="form-select">
 						<option value="" disabled th:selected="${selectedTask==null}">-- Seleziona un Task --</option>
 						<th:block th:each="wp:${selectedProject.wps}">
-							<optgroup th:label="${wp.titolo}">
+							<optgroup th:label="${wp.numeroOrdine+'. '+wp.titolo}">
 								<option th:each="task:${wp.tasks}"
 										th:value="${task.id}"
-										th:text="${task.nomeTask}"
+										th:text="${wp.numeroOrdine+'.'+task.numeroOrdine+' '+task.nomeTask}"
 										th:selected="${selectedTask!=null && selectedTask.id==task.id}">
 								</option>
 							</optgroup>

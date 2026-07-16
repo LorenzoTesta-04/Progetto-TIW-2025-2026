@@ -2,8 +2,9 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
 	<meta charset="UTF-8">
-	<title>Monitoraggio Stato Progetti</title>
+	<title>Home Responsabile</title>
 	<link rel="stylesheet" type="text/css" media="all" href="./css/style.css" th:href="@{./css/style.css}" />
+	<link rel="icon" type="image/x-icon" href="./img/logo.png">
 </head>
 <body>
 	<div class="admin-header">
@@ -90,15 +91,15 @@
 						</tr>
 					</thead>
 					<tbody>
-						<th:block th:each="wp, wpStat:${selectedProject.wps}">
+						<th:block th:each="wp:${selectedProject.wps}">
 							<tr th:each="task, taskStat:${wp.tasks}">
-								<td th:if="${taskStat.first}"
+        						<td th:if="${taskStat.first}"
 									th:rowspan="${wp.tasks.size()}"
-									th:text="${wpStat.count+'. '+wp.titolo}"
+									th:text="${wp.numeroOrdine+'. '+wp.titolo}"
 									class="td-wp-name">
 									Nome WP
 								</td>
-								<td th:text="${wpStat.count+'.'+taskStat.count+' '+task.nomeTask}" style="text-align: left; padding-left: 10px;">Nome Task</td>
+								<td th:text="${wp.numeroOrdine+'.'+task.numeroOrdine+' '+task.nomeTask}" style="text-align: left; padding-left: 10px;">Nome Task</td>
 								<th:block th:each="m:${#numbers.sequence(1, selectedProject.durata)}">
 									<td class="task-time-previste" th:text="${task.orePreviste.containsKey(m)}?${task.orePreviste.get(m)}:'-'">-</td>
 									<td class="task-time-lavorate" th:text="${task.oreLavorate.containsKey(m)}?${task.oreLavorate.get(m)}:'-'">-</td>

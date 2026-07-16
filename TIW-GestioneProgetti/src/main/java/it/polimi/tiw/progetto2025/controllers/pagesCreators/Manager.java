@@ -65,7 +65,6 @@ public class Manager extends HttpServlet
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
     	HttpSession session=request.getSession(false);
@@ -97,9 +96,9 @@ public class Manager extends HttpServlet
         Map<String, String> submittedHoursMap=new HashMap<>();
 
         //Recupero dati se si è verificato errore
-        if(session != null) 
+        if(session!=null) 
         {
-            if (session.getAttribute("errorMsg")!=null) 
+            if(session.getAttribute("errorMsg")!=null) 
             {
                 errorMsg=(String) session.getAttribute("errorMsg");
                 String originForm=(String)session.getAttribute("originForm");
@@ -196,6 +195,7 @@ public class Manager extends HttpServlet
         } 
         catch(SQLException e) 
         {
+        	e.printStackTrace();
             ctx.setVariable("errorMsg", "Servizio temporaneamente non disponibile: errore di connessione al database.");
             ctx.setVariable("user", user);
             templateEngine.process("manager", ctx, response.getWriter());

@@ -15,6 +15,7 @@ public class Task {
     private Map<Integer, Integer> orePreviste=new HashMap<>();
     private Map<Integer, Integer> oreLavorate=new HashMap<>();
     private List<Integer> collaboratori=new ArrayList<>();
+    private int numeroOrdine;
 
     public Task() {}
 
@@ -25,6 +26,7 @@ public class Task {
     public Map<Integer, Integer> getOrePreviste() {return orePreviste;}
     public Map<Integer, Integer> getOreLavorate() {return oreLavorate;}
     public List<Integer> getCollaboratori() {return collaboratori;}
+    public int getNumeroOrdine() {return numeroOrdine;}
     public int getMeseInizio() 
     {
     	if(orePreviste==null || orePreviste.isEmpty()) return 0;
@@ -68,4 +70,5 @@ public class Task {
     public void setOrePreviste(Map<Integer, Integer> orePrecedenti) {this.orePreviste=orePrecedenti;}
     public void setOreLavorate(Map<Integer, Integer> orePrecedenti) {this.oreLavorate=orePrecedenti;}
 	public void setCollaboratori(List<Integer> idCollaboratoriAssegnati) {this.collaboratori=idCollaboratoriAssegnati;}
+	public void setNumeroOrdine(int numeroOrdine) {this.numeroOrdine=numeroOrdine;}
 }

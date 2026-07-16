@@ -36,7 +36,7 @@ public class Admin extends HttpServlet
     private JakartaServletWebApplication webApplication;
 
     @Override
-    public void init()throws ServletException 
+    public void init() throws ServletException 
     {
         ServletContext servletContext=getServletContext();
         this.webApplication=JakartaServletWebApplication.buildApplication(servletContext);
@@ -55,7 +55,7 @@ public class Admin extends HttpServlet
             new com.mysql.cj.jdbc.Driver();
             this.connection=DriverManager.getConnection(MyDAO.DB_URL, MyDAO.DB_USER, MyDAO.DB_PASS);
         } 
-        catch (SQLException e)
+        catch(SQLException e)
         {
             throw new ServletException("Impossibile connettersi al DB nella Servlet Admin", e);
         }
