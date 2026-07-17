@@ -148,16 +148,16 @@ public class DoTaskAllocation extends HttpServlet
                 if(!oreObj.has(key)) 
                 {
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    response.getWriter().write("{\"error\": \"Nessun valore di ore definito per il mese " + m + "\"}");
+                    response.getWriter().write("{\"error\": \"Nessun valore di ore definito per il mese "+m+"\"}");
                     connection.rollback();
                     return;
                 }
 
                 int ore=oreObj.get(key).getAsInt();
-                if(ore<0) 
+                if(ore<=0) 
                 {
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    response.getWriter().write("{\"error\": \"Le ore inserite non possono essere negative (Mese " + m + ")\"}");
+                    response.getWriter().write("{\"error\": \"Le ore inserite devono essere >0 (Mese "+m+")\"}");
                     connection.rollback();
                     return;
                 }
@@ -178,7 +178,7 @@ public class DoTaskAllocation extends HttpServlet
             projObj.addProperty("nome", p.getNomeProgetto());
             projObj.addProperty("durata", p.getDurata());
             projObj.addProperty("stato", p.getStato().toString());
-            projObj.addProperty("isAssignable", projectDAO.isAssignable(p.getId())); // <-- Corretto "proj" in "p"
+            projObj.addProperty("isAssignable", projectDAO.isAssignable(p.getId()));
             
             //WPs
             JsonArray jsonWpList=new JsonArray();
@@ -279,7 +279,7 @@ public class DoTaskAllocation extends HttpServlet
 			catch(SQLException ignore) {}
 			
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			response.getWriter().write("Errore: " + e.getMessage());
+			response.getWriter().write("Errore: "+e.getMessage());
 		} 
 		finally
 		{

@@ -267,15 +267,15 @@ function addWorkPackage()
             <div style="display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;">
                 <div style="flex: 2; min-width: 150px;">
                     <label style="font-size: 0.85em; font-weight: bold;">Titolo WP</label>
-                    <input type="text" class="form-input" required/>
+                    <input type="text" class="form-input" required value="Titolo del WP"/>
                 </div>
                 <div style="flex: 1; min-width: 80px;">
                     <label style="font-size: 0.85em; font-weight: bold;">Mese Inizio</label>
-                    <input type="number" class="form-input" min="1" required/>
+                    <input type="number" class="form-input" min="1" required value="1"/>
                 </div>
                 <div style="flex: 1; min-width: 80px;">
                     <label style="font-size: 0.85em; font-weight: bold;">Mese Fine</label>
-                    <input type="number" class="form-input" min="1" required/>
+                    <input type="number" class="form-input" min="1" required value="${document.getElementById('durata').value}"/>
                 </div>
             </div>
 
@@ -302,6 +302,12 @@ function addTaskToWp(wpContainerId)
     const wpCard=document.getElementById(wpContainerId);
     const tasksContainer=wpCard.querySelector('.tasks-container');
 
+    const wpInputs=wpCard.querySelectorAll('.form-input');
+    const wpInputsFiltered=Array.from(wpInputs).filter(input => !input.closest('.task-card'));
+    
+    const defaultStart=wpInputsFiltered[1]?wpInputsFiltered[1].value:"1";
+    const defaultEnd=wpInputsFiltered[2]?wpInputsFiltered[2].value:"1";
+
     const taskHtml=`
         <div class="task-card" id="${tempTaskId}" draggable="true" ondragstart="dragTask(event)">
             <div class="section-header" style="margin-bottom: 8px;">
@@ -312,15 +318,15 @@ function addTaskToWp(wpContainerId)
             <div style="display: flex; gap: 10px; margin-bottom: 8px; flex-wrap: wrap;">
                 <div style="flex: 2; min-width: 150px;">
                     <label style="font-size: 0.8em;">Titolo Task</label>
-                    <input type="text" class="form-input" required style="padding: 5px; font-size: 0.9em;" />
+                    <input type="text" class="form-input" required style="padding: 5px; font-size: 0.9em;" value="Titolo del Task"/>
                 </div>
                 <div style="flex: 1; min-width: 70px;">
                     <label style="font-size: 0.8em;">Inizio</label>
-                    <input type="number" class="form-input" min="1" required style="padding: 5px; font-size: 0.9em;" />
+                    <input type="number" class="form-input" min="1" value="${defaultStart}" required style="padding: 5px; font-size: 0.9em;" />
                 </div>
                 <div style="flex: 1; min-width: 70px;">
                     <label style="font-size: 0.8em;">Fine</label>
-                    <input type="number" class="form-input" min="1" required style="padding: 5px; font-size: 0.9em;" />
+                    <input type="number" class="form-input" min="1" value="${defaultEnd}" required style="padding: 5px; font-size: 0.9em;" />
                 </div>
             </div>
             <div>
@@ -391,6 +397,32 @@ function dropTask(event)
     
     if(container && draggedTask) 
 	{
+        const targetWpCard=container.closest('.wp-card');
+        if(targetWpCard) 
+		{
+            const wpInputs=targetWpCard.querySelectorAll('.form-input');
+            const wpInputsFiltered=Array.from(wpInputs).filter(input => !input.closest('.task-card'));
+            
+            const wpInizio=parseInt(wpInputsFiltered[1].value) || 0;
+            const wpFine=parseInt(wpInputsFiltered[2].value) || 0;
+
+            const taskInputs=draggedTask.querySelectorAll('.form-input');
+            const taskInizio=parseInt(taskInputs[1].value) || 0;
+            const taskFine=parseInt(taskInputs[2].value) || 0;
+
+            if(taskInizio<wpInizio || taskFine>wpFine) 
+			{
+                showFeedback(`Impossibile spostare il task: le date (${taskInizio}-${taskFine}) escono dall'intervallo del WP di destinazione (${wpInizio}-${wpFine}).`, false);
+                
+                if(activePlaceholder) 
+				{
+                    activePlaceholder.remove();
+                    activePlaceholder=null;
+                }
+                return;
+            }
+        }
+
         if(activePlaceholder && container.contains(activePlaceholder)) 
 		{
             container.insertBefore(draggedTask, activePlaceholder);

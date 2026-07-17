@@ -464,7 +464,7 @@ function submitAllocationForm(taskId, wpCode, projectId)
         var nameAttr=input.name; 
         var monthNum=nameAttr.split('_').pop();
 
-        if(isNaN(hoursVal) || hoursVal<0) 
+        if(isNaN(hoursVal) || hoursVal<=0) 
 		{
             showFeedback('Errore: Le ore indicate per il mese '+monthNum+' non sono valide.', false);
             validationPassed=false;
@@ -536,6 +536,12 @@ function handleStartProject(projectId)
                     project.stato='ASSEGNATO';
                     
 					populateProjectSelectors();
+					
+					var selectProj=document.getElementById('idProgetto');
+					var selectWp=document.getElementById('codiceWP');
+					if(selectProj) selectProj.value=""; // Svuota la selezione del progetto
+					if(selectWp) selectWp.innerHTML='<option value="" disabled selected>-- Scegli un Work Package --</option>';
+					handleProjectSelection(null);
 
                     var selectMon=document.getElementById('idProgettoMonitor');
                     if(selectMon) 
