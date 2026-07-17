@@ -80,7 +80,6 @@ public class DoCreateWP extends HttpServlet
             ProjectDAO projectDAO=new ProjectDAO(connection);
             try 
             {
-            	int finalIdProgetto=idProgetto;
                 Project proj=projectDAO.findProjectById(idProgetto);
 
                 if(proj==null) errorMsg="Progetto non valido o inesistente.";

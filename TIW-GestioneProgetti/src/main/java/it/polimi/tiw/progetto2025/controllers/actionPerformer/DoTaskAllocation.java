@@ -126,9 +126,9 @@ public class DoTaskAllocation extends HttpServlet
 						try 
 						{
 							int ore=Integer.parseInt(oreStr);
-							if(ore<0) 
+							if(ore<=0) 
 							{
-								errorMsg="Il quantitativo orario non può essere negativo (Mese "+m+").";
+								errorMsg="Il quantitativo orario non può essere inferiore a 0 (Mese "+m+").";
 								break;
 							}
 							meseOreMap.put(m, ore);
