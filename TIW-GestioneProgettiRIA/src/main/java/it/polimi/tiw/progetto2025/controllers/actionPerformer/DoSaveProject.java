@@ -56,7 +56,7 @@ public class DoSaveProject extends HttpServlet
 		response.setCharacterEncoding("UTF-8");
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
 
-		if(!checkAccess.checkManager(session, response, getServletContext()))
+		if(!checkAccess.checkAdmin(session, response, getServletContext()))
 		{
 			response.setStatus(HttpServletResponse.SC_FORBIDDEN);
 			return;

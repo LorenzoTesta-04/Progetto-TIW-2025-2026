@@ -180,6 +180,14 @@ function populateCollaboratorSelector()
     if(!selectCollab)return;
     
     selectCollab.innerHTML='<option value="" disabled selected>-- Scegli un Collaboratore --</option>';
+	
+	var container=document.getElementById('collaborator-projects-container');
+    var details=document.getElementById('collaborator-monitor-details');
+    var msgEmpty=document.getElementById('no-monitor-collab-msg');
+
+    if(container) container.innerHTML='';
+    if(details) details.classList.add('hidden-section');
+    if(msgEmpty) msgEmpty.classList.remove('hidden-section');
 
     loadedData.managedCollaborators.forEach(function(managedId) {
         var collaboratorInfo=loadedData.collaborators.find(function(c) {

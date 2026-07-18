@@ -73,14 +73,14 @@ public class Admin extends HttpServlet
         {
             JsonObject jsonResponse=new JsonObject();
             
-            List<User> technicians=userDAO.findAllTechnicians();
+            List<User> technicians=userDAO.findAllCollaborators();
             JsonArray jsonTechnicians=new JsonArray();
             if(technicians!=null) 
                 for(User t:technicians) 
                 {
                     JsonObject tObj=new JsonObject();
                     tObj.addProperty("id", t.getID());
-                    tObj.addProperty("nomeCompleto", t.getNome()+" "+t.getCognome());
+                    tObj.addProperty("nomeCompleto", t.getCognome()+" "+t.getNome());
                     jsonTechnicians.add(tObj);
                 }
 
@@ -110,6 +110,7 @@ public class Admin extends HttpServlet
                     pJson.addProperty("id", p.getId());
                     pJson.addProperty("nomeProgetto", p.getNomeProgetto());
                     pJson.addProperty("stato", p.getStato());
+                    pJson.addProperty("responsabile", p.getResponsabile());
 
                     int projTotalHours=0;
                     int projWorkedHours=0;

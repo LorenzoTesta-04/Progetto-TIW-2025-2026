@@ -189,7 +189,8 @@ public class UserDAO
                        "JOIN "+MyDAO.TASK_TABLE+" t ON ol.idTask=t.idTask " +
                        "JOIN "+MyDAO.WORK_PACKAGE_TABLE+" wp ON t.idWp=wp.idWp " +
                        "JOIN "+MyDAO.PROJECT_TABLE+" p ON wp.idProgetto=p.id " +
-                       "WHERE p.idResponsabile=?";
+                       "WHERE p.idResponsabile=? "+
+                       "ORDER BY u.cognome, u.nome ASC";
     	
         try(PreparedStatement pstmt=connection.prepareStatement(query)) 
         {
@@ -238,30 +239,5 @@ public class UserDAO
         }
 	    
         return user;
-    }
-    
-    /**
-     * Estrae l'elenco di tutti gli utenti con ruolo di tecnico.
-     * @return lista di utenti non amministratori (tecnici)
-     * @throws SQLException se si verifica un errore di accesso al database
-     */
-    public List<User> findAllTechnicians() throws SQLException 
-    {
-        List<User> list=new ArrayList<>();
-        String query="SELECT id, nome, cognome FROM "+MyDAO.USER_TABLE+" WHERE admin=0";
-        
-        try(PreparedStatement pstmt=connection.prepareStatement(query); ResultSet rs=pstmt.executeQuery()) 
-        {
-            while (rs.next()) 
-            {
-                User u=new User();
-                u.setID(rs.getInt("id"));
-                u.setNome(rs.getString("nome"));
-                u.setCognome(rs.getString("cognome"));
-                list.add(u);
-            }
-        }
-        
-        return list;
     }
 }

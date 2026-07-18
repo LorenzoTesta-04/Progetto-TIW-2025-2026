@@ -178,6 +178,11 @@ function renderProjectDetails(project)
     document.getElementById('view-project-state').innerText=project.stato;
     document.getElementById('view-project-hours-planned').innerText=`${project.totalProjectHours} ore`;
     document.getElementById('view-project-hours-worked').innerText=`${project.totalWorkedHours} ore`;
+	
+	const managerEl=document.getElementById('view-project-manager');
+    if(managerEl)
+        managerEl.innerText =project.responsabile || 'Non specificato';
+	    
 
     const wpListContainer=document.getElementById('view-wp-list');
     wpListContainer.innerHTML='';
@@ -246,9 +251,30 @@ function updateIndexes()
             const taskTitleHeader=taskCard.querySelector('.task-header-title');
 			
             if(taskTitleHeader) 
-				taskTitleHeader.innerText=`Task #${taskNumber}`;
+			{
+                taskTitleHeader.dataset.taskNumber=taskNumber;
+                const titleInput=taskCard.querySelector('.task-title-input');
+                const taskName=titleInput?titleInput.value.trim():'';
+                taskTitleHeader.innerText=taskName?`Task #${taskNumber} - ${taskName}`:`Task #${taskNumber}`;
+            }
         });
     });
+}
+
+//Aggiorna in tempo reale il nome del task mostrato accanto ai puntini, mentre l'utente digita il titolo
+function syncTaskTitle(inputEl) 
+{
+    const taskCard=inputEl.closest('.task-card');
+    if(!taskCard) 
+        return;
+
+    const taskTitleHeader=taskCard.querySelector('.task-header-title');
+    if(!taskTitleHeader) 
+        return;
+
+    const taskNumber=taskTitleHeader.dataset.taskNumber||'';
+    const taskName=inputEl.value.trim();
+    taskTitleHeader.innerText=taskName?`Task #${taskNumber} - ${taskName}`:`Task #${taskNumber}`;
 }
 
 function addWorkPackage() 
@@ -309,8 +335,9 @@ function addTaskToWp(wpContainerId)
     const defaultEnd=wpInputsFiltered[2]?wpInputsFiltered[2].value:"1";
 
     const taskHtml=`
-        <div class="task-card" id="${tempTaskId}" draggable="true" ondragstart="dragTask(event)">
+        <div class="task-card" id="${tempTaskId}" draggable="false" ondragstart="dragTask(event)">
             <div class="section-header" style="margin-bottom: 8px;">
+                <span class="drag-handle" title="Trascina per riordinare" style="cursor: grab; margin-right: 8px; color: #888; font-size: 1.1em; line-height: 1; user-select: none;">⠿</span>
                 <strong class="task-header-title" style="font-size: 0.9em; color: #333;">Task #</strong>
                 <button type="button" class="btn-danger" style="padding: 2px 6px; font-size: 0.75em;" onclick="removeElement('${tempTaskId}')">- Rimuovi Task</button>
             </div>
@@ -318,7 +345,7 @@ function addTaskToWp(wpContainerId)
             <div style="display: flex; gap: 10px; margin-bottom: 8px; flex-wrap: wrap;">
                 <div style="flex: 2; min-width: 150px;">
                     <label style="font-size: 0.8em;">Titolo Task</label>
-                    <input type="text" class="form-input" required style="padding: 5px; font-size: 0.9em;" value="Titolo del Task"/>
+                    <input type="text" class="form-input task-title-input" required style="padding: 5px; font-size: 0.9em;" value="Titolo del Task" oninput="syncTaskTitle(this)"/>
                 </div>
                 <div style="flex: 1; min-width: 70px;">
                     <label style="font-size: 0.8em;">Inizio</label>
@@ -343,6 +370,17 @@ function addTaskToWp(wpContainerId)
 //DRAG&DROP
 let activePlaceholder=null;
 
+document.addEventListener('mousedown', (event) => {
+    const taskCard=event.target.closest('.task-card');
+    if(!taskCard) 
+        return;
+
+    if(event.target.closest('.drag-handle'))
+        taskCard.setAttribute('draggable', 'true');
+    else
+        taskCard.setAttribute('draggable', 'false');
+});
+
 function dragTask(event) 
 {
     saveState();
@@ -352,7 +390,10 @@ function dragTask(event)
 
 document.addEventListener('dragend', (event) => {
     if(event.target.classList.contains('task-card'))
+	{
         event.target.classList.remove('dragging');
+        event.target.setAttribute('draggable', 'false');
+	}
 
     if(activePlaceholder) 
 	{

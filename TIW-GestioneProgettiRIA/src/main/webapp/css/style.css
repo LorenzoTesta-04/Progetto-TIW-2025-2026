@@ -954,11 +954,9 @@ tr:hover { background-color: var(--color-riga-hover); }
 }
 
 .task-card.dragging {
-    opacity: 0.4;
-    border: 2px dashed #0056b3;
+    opacity: 0.4; 
 }
 
-/* Linea scura e marcata che indica il punto esatto di inserimento */
 .drag-placeholder {
     height: 4px;
     background-color: #0056b3;
@@ -966,4 +964,3 @@ tr:hover { background-color: var(--color-riga-hover); }
     border-radius: 2px;
     transition: all 0.1s ease;
 }
-
