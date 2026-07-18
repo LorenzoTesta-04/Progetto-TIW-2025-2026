@@ -88,6 +88,20 @@ public class DoTaskAllocation extends HttpServlet
 			if(project==null || project.getIdResponsabile()!=user.getID()) errorMsg="Non sei autorizzato a modificare questo progetto o il progetto non esiste.";
 			else if(!"CREATO".equalsIgnoreCase(project.getStato())) errorMsg="Impossibile allocare risorse in un progetto già assegnato o concluso.";
 
+			Task task=taskDAO.findTaskById(idTask);
+			if(task!=null) 
+			{
+				for(int m=task.getMeseInizio(); m<=task.getMeseFine(); m++) 
+				{
+					String fieldName="ore_task_"+idTask+"_mese_"+m;
+					rawHoursInput.put(fieldName, request.getParameter(fieldName));
+				}
+			}
+			else if(errorMsg==null) 
+			{
+				errorMsg="Task non trovato.";
+			}
+
 			//Validazione Collaboratori
 			if(errorMsg==null) 
 			{
@@ -106,39 +120,35 @@ public class DoTaskAllocation extends HttpServlet
 			}
 
 			//Validazione Mesi e Ore
-			if(errorMsg==null) 
+			if(errorMsg==null && task!=null) 
 			{
-				Task task=taskDAO.findTaskById(idTask);
-				if(task==null) errorMsg="Task non trovato.";
-				else 
-					for(int m=task.getMeseInizio(); m<=task.getMeseFine(); m++) 
-					{
-						String fieldName="ore_task_"+idTask+"_mese_"+m;
-						String oreStr=request.getParameter(fieldName);
-						rawHoursInput.put(fieldName, oreStr); 
-						
-						if(oreStr==null || oreStr.isEmpty()) 
-						{
-							errorMsg="Inserire le ore previste per il Mese "+m;
-							break;
-						}
+				for(int m=task.getMeseInizio(); m<=task.getMeseFine(); m++) 
+				{
+					String fieldName="ore_task_"+idTask+"_mese_"+m;
+					String oreStr=rawHoursInput.get(fieldName);
 
-						try 
+					if(oreStr==null || oreStr.isEmpty()) 
+					{
+						errorMsg="Inserire le ore previste per il Mese "+m;
+						break;
+					}
+
+					try 
+					{
+						int ore=Integer.parseInt(oreStr);
+						if(ore<=0) 
 						{
-							int ore=Integer.parseInt(oreStr);
-							if(ore<=0) 
-							{
-								errorMsg="Il quantitativo orario non può essere inferiore a 0 (Mese "+m+").";
-								break;
-							}
-							meseOreMap.put(m, ore);
-						} 
-						catch(NumberFormatException e) 
-						{
-							errorMsg="Il formato orario per il Mese "+m+" deve essere un numero intero.";
+							errorMsg="Il quantitativo orario non può essere inferiore a 0 (Mese "+m+").";
 							break;
 						}
+						meseOreMap.put(m, ore);
+					} 
+					catch(NumberFormatException e) 
+					{
+						errorMsg="Il formato orario per il Mese "+m+" deve essere un numero intero.";
+						break;
 					}
+				}
 			}
 
 			//Salvataggio in db

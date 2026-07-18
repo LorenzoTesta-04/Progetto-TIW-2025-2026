@@ -50,7 +50,7 @@ public class DoSaveHours extends HttpServlet
 		String oreLavorateStr=request.getParameter("oreLavorate");
 		
 		String errorMsg=null;
-		int idProgetto=0, idTask=0, mese=0, oreLavorate=0;      	
+		int idTask=0, mese=0, oreLavorate=0;      	
 			
 		//Validazione input
 		if(idTaskStr==null || idTaskStr.trim().isEmpty()) errorMsg="Task non specificato.";
@@ -79,7 +79,7 @@ public class DoSaveHours extends HttpServlet
 			try 
 			{
 				TaskDAO.updateHours(idTask, user.getID(), mese, oreLavorate); 
-				response.sendRedirect(getServletContext().getContextPath()+"/Collaborator?idProgetto="+idProgetto+"&idTask="+idTask+"&mese="+mese+"&success=true");
+				response.sendRedirect(getServletContext().getContextPath()+"/Collaborator?idProgetto="+idProgettoStr+"&idTask="+idTask+"&mese="+mese+"&success=true");
 				return;
 			} 
 			catch(SQLException e) 

@@ -189,7 +189,8 @@ public class UserDAO
                        "JOIN "+MyDAO.TASK_TABLE+" t ON ol.idTask=t.idTask " +
                        "JOIN "+MyDAO.WORK_PACKAGE_TABLE+" wp ON t.idWp=wp.idWp " +
                        "JOIN "+MyDAO.PROJECT_TABLE+" p ON wp.idProgetto=p.id " +
-                       "WHERE p.idResponsabile=?";
+                       "WHERE p.idResponsabile=? "+
+                       "ORDER BY u.cognome, u.nome ASC";
     	
         try(PreparedStatement pstmt=connection.prepareStatement(query)) 
         {

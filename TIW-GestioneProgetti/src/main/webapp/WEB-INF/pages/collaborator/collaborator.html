@@ -88,12 +88,11 @@
 								<table border="1" style="border-collapse: collapse; width: 100%; text-align: center; font-size: 13px;">
 									<thead>
 										<tr>
-											<th colspan="2" th:each="m:${#numbers.sequence(selectedTask.meseInizio, selectedTask.meseFine)}"
+											<th th:each="m:${#numbers.sequence(selectedTask.meseInizio, selectedTask.meseFine)}"
 												th:text="${'M'+m}" class="td-durata" style="padding: 5px; font-weight: 600; background-color: #f1f1f1;">MX</th>
 										</tr>
 										<tr>
 											<th:block th:each="m:${#numbers.sequence(selectedTask.meseInizio, selectedTask.meseFine)}">
-												<th class="th-previste">P</th>
 												<th class="th-lavorate">L</th>
 											</th:block>
 										</tr>
@@ -102,7 +101,6 @@
 										<tr>
 											<!-- Celle dei dati affiancate mese per mese -->
 											<th:block th:each="m:${#numbers.sequence(selectedTask.meseInizio, selectedTask.meseFine)}">
-												<td class="task-time-previste" th:text="${selectedTask.orePreviste.containsKey(m)}?${selectedTask.orePreviste.get(m)}:'-'">-</td>
 												<td class="task-time-lavorate" th:text="${selectedTask.oreLavorate.containsKey(m)}?${selectedTask.oreLavorate.get(m)}:'-'">-</td>
 											</th:block>
 										</tr>

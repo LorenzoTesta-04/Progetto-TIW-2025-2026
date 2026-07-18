@@ -116,14 +116,14 @@
 									<label class="form-section-label">Collaboratori del Task</label>
 									<p class="form-section-desc">Seleziona i collaboratori da associare a questa pianificazione.</p>
 									<div class="checkbox-list-container">
-										<div th:each="c:${collaborators}" class="checkbox-item">
-											<input type="checkbox"
-												   name="idCollaboratori"
-												   th:id="${'collab_'+t.id+'_'+c.id}"
-												   th:value="${c.id}"
-												   th:checked="${(lastFailedTaskId != null and lastFailedTaskId == #strings.toString(t.id)) ? (submittedCollaboratori != null and submittedCollaboratori.contains(#strings.toString(c.id))) : (t.collaboratori != null and t.collaboratori.contains(c.id))}" />
-											<label th:for="${'collab_'+t.id+'_'+c.id}" th:text="${c.cognome+' '+c.nome}"></label>
-										</div>
+									    <div th:each="c:${collaborators}" class="checkbox-item">
+									        <input type="checkbox"
+									               name="idCollaboratori"
+									               th:id="${'collab_'+t.id+'_'+c.id}"
+									               th:value="${c.id}"
+									               th:checked="${(submittedIdTask!=null and submittedIdTask==#strings.toString(t.id))?(submittedCollaboratori!=null and submittedCollaboratori.contains(#strings.toString(c.id))):(t.collaboratori!=null and t.collaboratori.contains(c.id))}" />
+									        <label th:for="${'collab_'+t.id+'_'+c.id}" th:text="${c.cognome+' '+c.nome}"></label>
+									    </div>
 									</div>
 								</div>
 
@@ -133,18 +133,18 @@
 										<label class="form-section-label">Ore Lavorative Mensili</label>
 										<p class="form-section-desc">Includi la stima oraria prevista per ciascun mese di attività del task.</p>
 										<div class="months-grid">
-											<div th:each="mese:${#numbers.sequence(t.meseInizio, t.meseFine)}" class="month-box">
-												<label th:for="${'ore_task_'+t.id+'_mese_'+mese}" class="month-label" th:text="${'Mese '+mese}">Mese X</label>
-												
-												<input type="number"
-													   th:id="${'ore_task_'+t.id+'_mese_'+mese}"
-													   th:name="${'ore_task_'+t.id+'_mese_'+mese}"
-													   th:value="${(lastFailedTaskId != null and lastFailedTaskId == #strings.toString(t.id) and submittedHours != null) ? submittedHours.get('ore_task_'+t.id+'_mese_'+mese) : (t.orePreviste!=null and t.orePreviste.containsKey(mese)?t.orePreviste.get(mese):0)}"
-													   min="0" 
-													   placeholder="0" 
-													   required 
-													   class="month-input" />
-											</div>
+										    <div th:each="mese:${#numbers.sequence(t.meseInizio, t.meseFine)}" class="month-box">
+										        <label th:for="${'ore_task_'+t.id+'_mese_'+mese}" class="month-label" th:text="${'Mese '+mese}">Mese X</label>
+										        
+										        <input type="number"
+										               th:id="${'ore_task_'+t.id+'_mese_'+mese}"
+										               th:name="${'ore_task_'+t.id+'_mese_'+mese}"
+										               th:value="${(submittedIdTask!=null and submittedIdTask==#strings.toString(t.id) and submittedHoursMap!=null)?submittedHoursMap.get('ore_task_'+t.id+'_mese_'+mese):(t.orePreviste!=null and t.orePreviste.containsKey(mese)?t.orePreviste.get(mese):0)}"
+										               min="0" 
+										               placeholder="0" 
+										               required 
+										               class="month-input" />
+										    </div>
 										</div>
 									</div>
 									<button type="submit" class="btn-save-allocation">Salva Allocazione Task</button>
